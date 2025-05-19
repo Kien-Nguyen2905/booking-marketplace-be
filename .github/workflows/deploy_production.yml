@@ -1,0 +1,87 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.0
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Create .env.production file
+        run: echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+      - name: Run Prisma migrations
+        run: npx dotenv -e .env.production -- prisma migrate deploy
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      - name: Build application
+        run: npm run build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Executing remote SSH commands
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST_PRODUCTION }}
+          username: ${{ secrets.USERNAME_PRODUCTION }}
+          password: ${{ secrets.PASSWORD_PRODUCTION }}
+          script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
+            fi
+            if [ ! -d "${{ secrets.REPO_NAME }}" ]; then
+              echo "Cloning repository"
+              git clone ${{ secrets.REPO_SSH }}
+              echo "Cloning repository done"
+              cd ~/${{ secrets.REPO_NAME }}
+              echo "Installing dependencies"
+              npm ci --force
+              echo "Installing dependencies done"
+              echo "Setting up environment variables"
+              echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+              echo "Setting up environment variables done"
+              echo "Generating Prisma Client"
+              npx prisma generate
+              echo "Building application"
+              NODE_OPTIONS="--max-old-space-size=1536" npm run build
+              echo "Building application done"
+              echo "Starting application"
+              pm2 start ecosystem.config.js
+              echo "Starting application done"
+            else
+              echo "Updating repository"
+              cd ~/${{ secrets.REPO_NAME }}
+              git fetch --all
+              git reset --hard origin/main
+              echo "Updating repository done"
+              echo "Setting up environment variables"
+              echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+              echo "Setting up environment variables done"
+              echo "Installing dependencies"
+              npm ci --force
+              echo "Installing dependencies done"
+              echo "Generating Prisma Client"
+              npx prisma generate
+              echo "Building application"
+              NODE_OPTIONS="--max-old-space-size=1536" npm run build
+              echo "Building application done"
+              echo "Restarting application"
+              pm2 restart booking-marketplace-be
+              echo "Restarting application done"
+            fi
+            pm2 save
+      - name: Verify deployment
+        run: |
+          echo "Application deployed successfully!"

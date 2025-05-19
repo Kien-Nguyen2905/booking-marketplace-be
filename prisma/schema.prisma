@@ -1,0 +1,495 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Amenity {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique @db.VarChar(100)
+  category      CategoryType
+  createdAt     DateTime?       @default(now()) @db.Timestamp(6)
+  ObjectAmenity ObjectAmenity[]
+}
+
+model Coupon {
+  id                            Int           @id @default(autoincrement())
+  applierId                     Int?
+  title                         String        @db.VarChar(100)
+  description                   String        @db.VarChar(255)
+  code                          String        @db.VarChar(50)
+  amount                        Int
+  percentage                    Float?        @default(0) @db.Real
+  sharePercentage               Float?        @default(0) @db.Real
+  usedCount                     Int?          @default(0)
+  status                        CouponStatus? @default(PENDING)
+  createdById                   Int?
+  updatedById                   Int?
+  deletedAt                     DateTime?     @db.Timestamp(6)
+  createdAt                     DateTime?     @default(now()) @db.Timestamp(6)
+  updatedAt                     DateTime?     @default(now()) @db.Timestamp(6)
+  Partner                       Partner?      @relation(fields: [applierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User_Coupon_createdByIdToUser User?         @relation("Coupon_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User_Coupon_updatedByIdToUser User?         @relation("Coupon_updatedByIdToUser", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Order                         Order[]
+}
+
+model Customer {
+  id          Int       @id @default(autoincrement())
+  fullName    String    @db.VarChar(255)
+  phoneNumber String    @db.VarChar(20)
+  email       String    @db.VarChar(255)
+  createdAt   DateTime? @default(now()) @db.Timestamp(6)
+  order       Order?
+}
+
+model Device {
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  userAgent    String
+  browser      String?       @db.VarChar(50)
+  os           String?       @db.VarChar(50)
+  deviceType   String?       @db.VarChar(50)
+  ip           String?
+  isActive     Boolean?      @default(true)
+  lastActive   DateTime?     @default(now()) @db.Timestamp(6)
+  createdAt    DateTime?     @default(now()) @db.Timestamp(6)
+  user         User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  refreshToken RefreshToken?
+
+  @@unique([userId, userAgent])
+}
+
+model Hotel {
+  id               Int             @id @default(autoincrement())
+  partnerId        Int             @unique
+  name             String          @db.VarChar(255)
+  hotelPhoneNumber String          @db.VarChar(20)
+  type             HotelType
+  reputationCore   Float?          @default(100) @db.Real
+  rating           Float?          @default(0) @db.Real
+  vat              Float           @db.Real
+  address          String
+  provinceCode     Int
+  districtCode     Int
+  wardCode         Int
+  description      String
+  images           String[]
+  status           HotelStatus?    @default(PENDING)
+  createdAt        DateTime?       @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime?       @default(now()) @db.Timestamp(6)
+  Partner          Partner         @relation(fields: [partnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ObjectAmenity    ObjectAmenity[]
+  Order            Order[]
+  Review           Review[]
+  Room             Room[]
+  RoomType         RoomType[]
+  Wishlist         Wishlist[]
+}
+
+model Notify {
+  id                            Int        @id @default(autoincrement())
+  recipientId                   Int
+  title                         String     @db.VarChar(100)
+  type                          NotifyType
+  message                       String
+  createdById                   Int
+  readAt                        DateTime?  @db.Timestamp(6)
+  createdAt                     DateTime?  @default(now()) @db.Timestamp(6)
+  updatedAt                     DateTime?  @default(now()) @db.Timestamp(6)
+  User_Notify_createdByIdToUser User       @relation("Notify_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User_Notify_recipientIdToUser User       @relation("Notify_recipientIdToUser", fields: [recipientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ObjectAmenity {
+  id        Int      @id @default(autoincrement())
+  objectId  Int
+  amenityId Int
+  Amenity   Amenity  @relation(fields: [amenityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RoomType  RoomType @relation(fields: [objectId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Hotel     Hotel    @relation(fields: [objectId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ObjectAmenity_objectId_fkey1")
+}
+
+model Order {
+  id               Int          @id @default(autoincrement())
+  userId           Int
+  customerId       Int          @unique
+  hotelId          Int
+  roomId           Int
+  quantity         Int
+  checkinDate      DateTime     @db.Timestamp(6)
+  checkoutDate     DateTime     @db.Timestamp(6)
+  basePrice        Float        @db.Real
+  pointDiscount    Float        @db.Real
+  couponId         Int?
+  discountId       Int?
+  vatAmount        Float        @db.Real
+  totalPrice       Float        @db.Real
+  serviceFeeAmount Float        @db.Real
+  commissionAmount Float        @db.Real
+  status           OrderStatus? @default(PENDING)
+  paymentType      PaymentType
+  notes            String?
+  arrivalTime      DateTime?    @db.Timestamp(6)
+  checkoutTime     DateTime?    @db.Timestamp(6)
+  createdAt        DateTime?    @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime?    @default(now()) @db.Timestamp(6)
+  Coupon           Coupon?      @relation(fields: [couponId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Customer         Customer     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Promotion        Promotion?   @relation(fields: [discountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Hotel            Hotel        @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Room             Room         @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User             User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Review           Review?
+}
+
+model Partner {
+  id             Int            @id @default(autoincrement())
+  userId         Int            @unique
+  fullName       String         @db.VarChar(255)
+  email          String         @unique @db.VarChar(255)
+  phoneNumber    String         @db.VarChar(20)
+  idCard         String         @unique @db.VarChar(50)
+  birth          DateTime       @db.Timestamp(6)
+  gender         String         @db.VarChar(10)
+  address        String
+  provinceCode   Int
+  districtCode   Int
+  wardCode       Int
+  companyName    String         @db.VarChar(255)
+  accountNumber  String         @db.VarChar(100)
+  bankAccount    String         @db.VarChar(100)
+  bankName       String         @db.VarChar(255)
+  commissionRate Float?         @default(0.15) @db.Real
+  status         PartnerStatus? @default(PENDING)
+  createdById    Int?
+  createdAt      DateTime?      @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime?      @default(now()) @db.Timestamp(6)
+  Coupon         Coupon[]
+  Hotel          Hotel?
+  User           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Permission {
+  id               Int                @id @default(autoincrement())
+  name             String             @unique @db.VarChar(255)
+  description      String?
+  path             String             @db.VarChar(255)
+  method           HTTPMethod
+  createdAt        DateTime?          @default(now()) @db.Timestamp(6)
+  PermissionToRole PermissionToRole[]
+}
+
+model PermissionToRole {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Promotion {
+  id              Int       @id @default(autoincrement())
+  title           String    @db.VarChar(100)
+  percentage      Float?    @default(0) @db.Real
+  sharePercentage Float?    @default(0) @db.Real
+  validFrom       DateTime  @db.Date
+  validUntil      DateTime  @db.Date
+  createdById     Int
+  deletedAt       DateTime? @db.Timestamp(6)
+  createdAt       DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime? @default(now()) @db.Timestamp(6)
+  Order           Order[]
+  User            User      @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model RefreshToken {
+  token     String    @id @db.VarChar(255)
+  userId    Int
+  deviceId  Int       @unique
+  expiresAt DateTime  @db.Timestamp(6)
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Refund {
+  id          Int           @id @default(autoincrement())
+  orderId     Int
+  amount      Float         @db.Real
+  reason      String?
+  status      RefundStatus? @default(PENDING)
+  createdById Int
+  createdAt   DateTime?     @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime?     @default(now()) @db.Timestamp(6)
+  user        User          @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Review {
+  id        Int       @id @default(autoincrement())
+  orderId   Int       @unique
+  hotelId   Int
+  userId    Int
+  title     String
+  content   String
+  image     String?
+  rating    Int
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  Hotel     Hotel     @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Order     Order     @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Role {
+  id               Int                @id @default(autoincrement())
+  name             String             @unique @db.VarChar(50)
+  description      String?
+  createdAt        DateTime?          @default(now()) @db.Timestamp(6)
+  PermissionToRole PermissionToRole[]
+  User             User[]
+}
+
+model Room {
+  id               Int                @id @default(autoincrement())
+  hotelId          Int
+  roomTypeId       Int
+  price            Float              @db.Real
+  quantity         Int
+  rangeLimitDate   Int?               @default(0)
+  policy           PolicyType?        @default(NON_REFUNDABLE)
+  notePolicy       String?
+  deletedAt        DateTime?          @db.Timestamp(6)
+  createdAt        DateTime?          @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime?          @default(now()) @db.Timestamp(6)
+  Order            Order[]
+  Hotel            Hotel              @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RoomType         RoomType           @relation(fields: [roomTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RoomAvailability RoomAvailability[]
+  RoomBlock        RoomBlock[]
+}
+
+model RoomAvailability {
+  id             Int       @id @default(autoincrement())
+  roomId         Int
+  availableRooms Int
+  createdAt      DateTime? @default(now()) @db.Timestamp(6)
+  Room           Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model RoomBed {
+  id          Int         @id @default(autoincrement())
+  roomBedType RoomBedType
+  quantity    Int
+  createdAt   DateTime?   @default(now()) @db.Timestamp(6)
+  RoomType    RoomType[]
+}
+
+model RoomBlock {
+  id        Int       @id @default(autoincrement())
+  roomId    Int
+  quantity  Int
+  startDate DateTime  @db.Timestamp(6)
+  endDate   DateTime  @db.Timestamp(6)
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  Room      Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model RoomType {
+  id             Int             @id @default(autoincrement())
+  hotelId        Int
+  roomType       String          @db.VarChar(100)
+  adults         Int
+  child          Int?            @default(0)
+  roomBedId      Int
+  area           Int
+  serviceFeeRate Float           @db.Real
+  description    String
+  images         String[]
+  deletedAt      DateTime?       @db.Timestamp(6)
+  createdAt      DateTime?       @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime?       @default(now()) @db.Timestamp(6)
+  ObjectAmenity  ObjectAmenity[]
+  Room           Room[]
+  Hotel          Hotel           @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RoomBed        RoomBed         @relation(fields: [roomBedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Transaction {
+  id                 Int             @id @default(autoincrement())
+  gateway            String          @db.VarChar(100)
+  transactionDate    DateTime?       @default(now()) @db.Timestamp(6)
+  accountNumber      String?         @db.VarChar(255)
+  subAccount         String?         @db.VarChar(255)
+  amount             Int?            @default(0)
+  type               TransactionType
+  accumulated        Int?
+  code               String?         @db.VarChar(255)
+  transactionContent String?
+  referenceNumber    String?         @db.VarChar(255)
+  body               String?
+  createdAt          DateTime?       @default(now()) @db.Timestamp(6)
+}
+
+model User {
+  id                              Int            @id @default(autoincrement())
+  email                           String         @unique @db.VarChar(255)
+  password                        String         @db.VarChar(255)
+  fullName                        String?        @db.VarChar(255)
+  phoneNumber                     String?        @db.VarChar(20)
+  avatar                          String?
+  totpSecret                      String?        @db.VarChar(255)
+  uriSecret                       String?        @db.VarChar(255)
+  address                         String?
+  gender                          String?        @db.VarChar(10)
+  birthday                        DateTime?      @db.Date
+  earnPoint                       Float?         @default(0) @db.Real
+  accountNumber                   String?        @db.VarChar(100)
+  bankAccount                     String?        @db.VarChar(100)
+  bankName                        String?        @db.VarChar(255)
+  roleId                          Int
+  status                          UserStatus?    @default(ACTIVE)
+  createdById                     Int?
+  createdAt                       DateTime?      @default(now()) @db.Timestamp(6)
+  updatedAt                       DateTime?      @default(now()) @db.Timestamp(6)
+  Coupon_Coupon_createdByIdToUser Coupon[]       @relation("Coupon_createdByIdToUser")
+  Coupon_Coupon_updatedByIdToUser Coupon[]       @relation("Coupon_updatedByIdToUser")
+  Device                          Device[]
+  Notify_Notify_createdByIdToUser Notify[]       @relation("Notify_createdByIdToUser")
+  Notify_Notify_recipientIdToUser Notify[]       @relation("Notify_recipientIdToUser")
+  Order                           Order[]
+  Partner                         Partner?
+  Promotion                       Promotion[]
+  RefreshToken                    RefreshToken[]
+  Refund                          Refund[]
+  Review                          Review[]
+  User                            User?          @relation("UserToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_User                      User[]         @relation("UserToUser")
+  role                            Role           @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  wishlist                        Wishlist[]
+}
+
+model VerificationCode {
+  id        Int                  @id @default(autoincrement())
+  email     String               @db.VarChar(255)
+  code      String               @db.VarChar(10)
+  type      VerificationCodeType
+  expiresAt DateTime             @db.Timestamp(6)
+  createdAt DateTime?            @default(now()) @db.Timestamp(6)
+
+  @@unique([email, code, type])
+  @@index([expiresAt])
+}
+
+model Wishlist {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  hotelId Int
+  Hotel   Hotel @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User    User  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum CategoryType {
+  ROOM
+  PUBLIC
+  SERVICE
+}
+
+enum CouponStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+  RELEASED
+}
+
+enum HTTPMethod {
+  GET
+  POST
+  PUT
+  DELETE
+  PATCH
+  OPTIONS
+  HEAD
+}
+
+enum HotelStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum HotelType {
+  HOTEL
+  HOSTEL
+  APARTMENT
+  GUESTHOUSE
+  HOMESTAY
+  VILLA
+  RESORT
+}
+
+enum NotifyType {
+  REFUND
+  DEMAND
+  INFORM
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+enum PartnerStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum PaymentType {
+  BANKING
+  PAY_AT_HOTEL
+}
+
+enum PolicyType {
+  NON_REFUNDABLE
+  FREE_CANCELLATION
+  PAY_AT_HOTEL
+}
+
+enum RefundStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum RoomBedType {
+  KING
+  QUEEN
+  DOUBLE
+  TWIN
+  SINGLE
+  BUNK
+}
+
+enum TransactionType {
+  IN
+  OUT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum VerificationCodeType {
+  REGISTER
+  FORGOT_PASSWORD
+  VERIFY
+}
