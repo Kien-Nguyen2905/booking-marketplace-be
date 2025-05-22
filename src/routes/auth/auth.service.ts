@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { addMilliseconds } from 'date-fns'
 import {
   EmailAlreadyExistsException,
@@ -112,7 +112,7 @@ export class AuthService {
     return verificationCode
   }
 
-  async register(body: RegisterBodyType & { userAgent: string; ip: string }) {
+  async register(body: RegisterBodyType & { userAgent: string }) {
     // Extract device info
     const { browser, os, deviceType } = extractDeviceInfo(body.userAgent)
 
@@ -146,7 +146,6 @@ export class AuthService {
       const device = await this.authRepository.createDevice({
         userId: user.id,
         userAgent: body.userAgent,
-        ip: body.ip,
         browser,
         os,
         deviceType,
@@ -190,7 +189,7 @@ export class AuthService {
     return { accessToken, refreshToken }
   }
 
-  async login(body: LoginBodyType & { userAgent: string; ip: string }) {
+  async login(body: LoginBodyType & { userAgent: string }) {
     // Extract device info
     const { browser, os, deviceType } = extractDeviceInfo(body.userAgent)
 
@@ -237,7 +236,6 @@ export class AuthService {
       const device = await this.authRepository.createDevice({
         userId: user.id,
         userAgent: body.userAgent,
-        ip: body.ip,
         browser,
         os,
         deviceType,
@@ -276,7 +274,7 @@ export class AuthService {
     return tokens
   }
 
-  async refreshToken({ refreshToken, userAgent, ip }: RefreshTokenBodyType & { userAgent: string; ip: string }) {}
+  async refreshToken({ refreshToken, userAgent }: RefreshTokenBodyType & { userAgent: string }) {}
 
   async logout(refreshToken: string) {
     try {
@@ -412,7 +410,7 @@ export class AuthService {
     }
   }
 
-  async getAllDevices({ userId, userAgent, ip }: { userId: number; userAgent: string; ip: string }) {
+  async getAllDevices({ userId, userAgent }: { userId: number; userAgent: string }) {
     const devices = await this.authRepository.findDevicesByUserId(userId)
     const listDevicesMarkMe = devices.map((device) => {
       if (device.userAgent === userAgent) {

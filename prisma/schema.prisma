@@ -54,7 +54,6 @@ model Device {
   browser      String?       @db.VarChar(50)
   os           String?       @db.VarChar(50)
   deviceType   String?       @db.VarChar(50)
-  ip           String?
   isActive     Boolean?      @default(true)
   lastActive   DateTime?     @default(now()) @db.Timestamp(6)
   createdAt    DateTime?     @default(now()) @db.Timestamp(6)

@@ -64,7 +64,6 @@ export const DeviceSchema = z.object({
   deviceType: z.string().nullable(),
   deviceVendor: z.string().nullable(),
   deviceModel: z.string().nullable(),
-  ip: z.string(),
   lastActive: z.date().nullable(),
   createdAt: z.date().nullable(),
   isActive: z.boolean().nullable().default(true),
@@ -88,7 +87,6 @@ export const LogoutBodySchema = RefreshTokenBodySchema
 
 export const GoogleAuthStateSchema = DeviceSchema.pick({
   userAgent: true,
-  ip: true,
 })
 
 export const GetAuthorizationUrlResSchema = z.object({

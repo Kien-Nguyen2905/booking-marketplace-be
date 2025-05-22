@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Ip, Post, Query, Res } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Res } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { MessageResDTO } from 'src/shared/dto/response.dto'
@@ -44,19 +44,18 @@ export class AuthController {
   @Post('register')
   @IsPublic()
   @ZodSerializerDto(RegisterResDTO)
-  register(@Body() body: RegisterBodyDTO, @UserAgent() userAgent: string, @Ip() ip: string) {
-    return this.authService.register({ ...body, userAgent, ip })
+  register(@Body() body: RegisterBodyDTO, @UserAgent() userAgent: string) {
+    return this.authService.register({ ...body, userAgent })
   }
 
   @Post('login')
   @IsPublic()
   @ZodSerializerDto(LoginResDTO)
   @Message('Login successful')
-  login(@Body() body: LoginBodyDTO, @UserAgent() userAgent: string, @Ip() ip: string) {
+  login(@Body() body: LoginBodyDTO, @UserAgent() userAgent: string) {
     return this.authService.login({
       ...body,
       userAgent,
-      ip,
     })
   }
 
@@ -64,11 +63,10 @@ export class AuthController {
   @IsPublic()
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(RefreshTokenResDTO)
-  refreshToken(@Body() body: RefreshTokenBodyDTO, @UserAgent() userAgent: string, @Ip() ip: string) {
+  refreshToken(@Body() body: RefreshTokenBodyDTO, @UserAgent() userAgent: string) {
     return this.authService.refreshToken({
       refreshToken: body.refreshToken,
       userAgent,
-      ip,
     })
   }
 
@@ -83,10 +81,9 @@ export class AuthController {
   @Get('google-link')
   @IsPublic()
   @ZodSerializerDto(GetAuthorizationUrlResDTO)
-  getAuthorizationUrl(@UserAgent() userAgent: string, @Ip() ip: string) {
+  getAuthorizationUrl(@UserAgent() userAgent: string) {
     return this.googleService.getAuthorizationUrl({
       userAgent,
-      ip,
     })
   }
 
@@ -141,11 +138,10 @@ export class AuthController {
 
   @Get('all-devices')
   @ZodSerializerDto(GetAllDevicesDTO)
-  getDevices(@ActiveUser('userId') userId: number, @UserAgent() userAgent: string, @Ip() ip: string) {
+  getDevices(@ActiveUser('userId') userId: number, @UserAgent() userAgent: string) {
     return this.authService.getAllDevices({
       userId,
       userAgent,
-      ip,
     })
   }
 }

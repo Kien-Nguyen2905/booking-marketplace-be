@@ -91,7 +91,7 @@ export class AuthRepository {
 
   // Create device
   async createDevice(
-    data: Pick<DeviceType, 'userId' | 'userAgent' | 'ip' | 'browser' | 'os' | 'deviceType'> &
+    data: Pick<DeviceType, 'userId' | 'userAgent' | 'browser' | 'os' | 'deviceType'> &
       Partial<Pick<DeviceType, 'lastActive' | 'isActive'>>,
   ) {
     return await this.prismaService.device.create({

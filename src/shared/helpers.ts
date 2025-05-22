@@ -28,9 +28,9 @@ export const extractDeviceInfo = (
 } => {
   const parser = new UAParser(userAgent)
   const result = parser.getResult()
-  const browser = `${result.browser.name} ${result.browser.version}` || 'Unknown'
-  const os = `${result.os.name} ${result.os.version}` || 'Unknown'
-  const deviceType = result.device.type || 'Unknown'
+  const browser = result.browser.name ? `${result.browser.name} ${result.browser.version}` : 'Unknown'
+  const os = result.os.name ? `${result.os.name} ${result.os.version}` : 'Unknown'
+  const deviceType = result.device.type ? result.device.type : 'Unknown'
   return {
     browser,
     os,

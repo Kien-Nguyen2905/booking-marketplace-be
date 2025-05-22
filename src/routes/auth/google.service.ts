@@ -31,13 +31,12 @@ export class GoogleService {
       envConfig.GOOGLE_REDIRECT_URI,
     )
   }
-  getAuthorizationUrl({ userAgent, ip }: GoogleAuthStateType) {
+  getAuthorizationUrl({ userAgent }: GoogleAuthStateType) {
     const scope = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
     // Chuyển Object sang string base64 an toàn bỏ lên url
     const stateString = Buffer.from(
       JSON.stringify({
         userAgent,
-        ip,
       }),
     ).toString('base64')
     const url = this.oauth2Client.generateAuthUrl({
@@ -58,7 +57,6 @@ export class GoogleService {
         if (state) {
           const clientInfo = JSON.parse(Buffer.from(state, 'base64').toString()) as GoogleAuthStateType
           userAgent = clientInfo.userAgent
-          ip = clientInfo.ip
         }
       } catch (error) {
         console.error('Error parsing state', error)
@@ -106,7 +104,6 @@ export class GoogleService {
         newDevice = await this.authRepository.createDevice({
           userId: user.id,
           userAgent,
-          ip,
           browser,
           os,
           deviceType,
@@ -155,7 +152,6 @@ export class GoogleService {
         const device = await this.authRepository.createDevice({
           userId: user.id,
           userAgent,
-          ip,
           browser,
           os,
           deviceType,
