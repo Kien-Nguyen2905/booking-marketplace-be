@@ -23,9 +23,7 @@ export const UnauthorizedAccessException = new UnauthorizedException('You are no
 export const GoogleUserInfoError = new Error('Failed to retrieve user information from Google')
 
 // TOTP
-export const InvalidTOTPException = new UnprocessableEntityException([
-  { message: 'TOTP code is invalid', path: 'totpCode' },
-])
+export const InvalidTOTPException = new UnprocessableEntityException([{ message: 'Code is invalid', path: 'totpCode' }])
 export const EmptyTOTPException = new UnprocessableEntityException([
   { message: 'TOTP code is required', path: 'totpCode' },
 ])

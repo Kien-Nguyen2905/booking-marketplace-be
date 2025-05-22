@@ -390,7 +390,7 @@ export class AuthService {
 
     // 5. Trả về thông báo
     return {
-      message: 'Two-factor authentication disabled successfully',
+      message: MESSAGES.AUTH.DISABLE_2FA_SUCCESS,
     }
   }
 

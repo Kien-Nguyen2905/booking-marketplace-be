@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { SharedRoleRepository } from 'src/shared/repositories/shared-role.repo'
 import { extractDeviceInfo } from 'src/shared/helpers'
 import { SharedUserRepository } from 'src/shared/repositories/shared-user.repo'
-import { MailProducer, MailType } from 'src/shared/producers/mail.producer'
+import { MailProducer } from 'src/shared/producers/mail.producer'
 import { UserStatus } from 'src/shared/constants/auth.constant'
 
 @Injectable()

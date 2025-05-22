@@ -14,6 +14,7 @@ import { AuthenticationGuard } from 'src/shared/guards/authentication.guard'
 import { BullModule } from '@nestjs/bullmq'
 import { SEND_MAIL_QUEUE_NAME } from 'src/shared/constants/queue.constant'
 import { MailProducer } from 'src/shared/producers/mail.producer'
+import { S3Service } from 'src/shared/services/s3.service'
 
 const sharedServices = [
   PrismaService,
@@ -24,6 +25,7 @@ const sharedServices = [
   SharedRoleRepository,
   TwoFactorService,
   MailProducer,
+  S3Service,
 ]
 
 @Global()

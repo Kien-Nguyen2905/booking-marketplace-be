@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { randomInt } from 'crypto'
 import { UAParser } from 'ua-parser-js'
-
+import path from 'path'
 // Type Predicate
 export function isUniqueConstraintPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
@@ -36,4 +36,9 @@ export const extractDeviceInfo = (
     os,
     deviceType,
   }
+}
+
+export const generateRandomFilename = (filename: string) => {
+  const ext = path.extname(filename)
+  return `${Date.now() + '-' + Math.round(Math.random() * 1e9)}${ext}`
 }
