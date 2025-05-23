@@ -51,7 +51,7 @@ export class GoogleService {
   async googleCallback({ code, state }: { code: string; state: string }) {
     try {
       let userAgent = 'Unknown'
-      let ip = 'Unknown'
+      const ip = 'Unknown'
       // 1. Lấy state từ url
       try {
         if (state) {

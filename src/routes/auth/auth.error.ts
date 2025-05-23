@@ -1,4 +1,4 @@
-import { UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
+import { ForbiddenException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
 
 // OTP
 export const InvalidOTPException = new UnprocessableEntityException([{ message: 'OTP code is invalid', path: 'code' }])
@@ -27,7 +27,6 @@ export const InvalidTOTPException = new UnprocessableEntityException([{ message:
 export const EmptyTOTPException = new UnprocessableEntityException([
   { message: 'TOTP code is required', path: 'totpCode' },
 ])
-
 export const TOTPAlreadyEnabledException = new UnprocessableEntityException([
   { message: 'Two-factor authentication is already enabled', path: 'totpCode' },
 ])

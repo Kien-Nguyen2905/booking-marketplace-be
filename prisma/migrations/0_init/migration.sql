@@ -93,7 +93,6 @@ CREATE TABLE "Device" (
     "browser" VARCHAR(50),
     "os" VARCHAR(50),
     "deviceType" VARCHAR(50),
-    "ip" TEXT,
     "isActive" BOOLEAN DEFAULT true,
     "lastActive" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
@@ -445,9 +444,6 @@ CREATE UNIQUE INDEX "Partner_idCard_key" ON "Partner"("idCard");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Permission_name_key" ON "Permission"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "RefreshToken_deviceId_key" ON "RefreshToken"("deviceId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Review_orderId_key" ON "Review"("orderId");

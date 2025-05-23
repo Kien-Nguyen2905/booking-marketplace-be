@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { HttpException, Injectable } from '@nestjs/common'
 import { addMilliseconds } from 'date-fns'
 import {
   EmailAlreadyExistsException,
@@ -18,6 +18,7 @@ import {
   ForgotPasswordBodyType,
   ForgotTwoFactorAuthType,
   LoginBodyType,
+  LoginBodyType2FA,
   RefreshTokenBodyType,
   RegisterBodyType,
   SendOTPBodyType,
@@ -209,6 +210,80 @@ export class AuthService {
     }
     // Check TOTP enabled
     if (user.totpSecret) {
+      return {
+        message: MESSAGES.ERROR.NEED_VERIFY_2FA,
+        statusCode: 307,
+      }
+    }
+
+    const deviceExist = await this.sharedUserRepository.findDeviceByUserAndUserAgent({
+      userId_userAgent: {
+        userId: user.id,
+        userAgent: body.userAgent,
+      },
+    })
+    if (!deviceExist) {
+      // Create device
+      const device = await this.authRepository.createDevice({
+        userId: user.id,
+        userAgent: body.userAgent,
+        browser,
+        os,
+        deviceType,
+      })
+      // Send email notification for new device
+      await this.mailProducer.sendNewDeviceMail({
+        email: user.email,
+        deviceInfo: {
+          browser,
+          os,
+          deviceType,
+        },
+        loginTime: new Date(),
+      })
+      // Create accessToken and refreshToken
+      const tokens = await this.generateTokens({
+        userId: user.id,
+        deviceId: device.id,
+        roleId: user.roleId,
+        roleName: user.role.name,
+      })
+      return tokens
+    }
+    // Update device had been logout
+    await this.authRepository.updateDevice(deviceExist.id, {
+      isActive: true,
+      lastActive: new Date(),
+    })
+    // Create accessToken and refreshToken
+    const tokens = await this.generateTokens({
+      userId: user.id,
+      deviceId: deviceExist.id,
+      roleId: user.roleId,
+      roleName: user.role.name,
+    })
+    return tokens
+  }
+
+  async loginWith2FA(body: LoginBodyType2FA & { userAgent: string }) {
+    // Extract device info
+    const { browser, os, deviceType } = extractDeviceInfo(body.userAgent)
+    // Check user exist
+    const user = await this.authRepository.findUniqueUserIncludeRole({
+      email: body.email,
+    })
+    if (!user) {
+      throw EmailNotFoundException
+    }
+    if (user && user.status === UserStatus.INACTIVE) {
+      throw UserInactiveException
+    }
+    const isPasswordMatch = await this.hashingService.compare(body.password, user.password)
+    if (!isPasswordMatch) {
+      throw InvalidPasswordException
+    }
+    // Check TOTP enabled
+    if (user.totpSecret) {
       // Check TOTP Code
       if (!body.totpCode) {
         throw EmptyTOTPException
@@ -274,7 +349,43 @@ export class AuthService {
     return tokens
   }
 
-  async refreshToken({ refreshToken, userAgent }: RefreshTokenBodyType & { userAgent: string }) {}
+  async refreshToken({ refreshToken, userAgent }: RefreshTokenBodyType & { userAgent: string }) {
+    try {
+      // Check refreshToken valid
+      const { userId } = await this.tokenService.verifyRefreshToken(refreshToken)
+      // Check refreshToken exist db
+      const refreshTokenInDb = await this.authRepository.findUniqueRefreshTokenIncludeUserRole({
+        token: refreshToken,
+      })
+      if (!refreshTokenInDb) {
+        throw RefreshTokenAlreadyUsedException
+      }
+      const {
+        deviceId,
+        user: {
+          roleId,
+          role: { name: roleName },
+        },
+      } = refreshTokenInDb
+      // Update device
+      const $updateDevice = this.authRepository.updateDevice(deviceId, {
+        userAgent,
+      })
+      // Delete former token
+      const $deleteRefreshToken = this.authRepository.deleteRefreshToken({
+        token: refreshToken,
+      })
+      // Generate a pair of tokens
+      const $tokens = this.generateTokens({ userId, roleId, roleName, deviceId })
+      const [, , tokens] = await Promise.all([$updateDevice, $deleteRefreshToken, $tokens])
+      return tokens
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error
+      }
+      throw UnauthorizedAccessException
+    }
+  }
 
   async logout(refreshToken: string) {
     try {

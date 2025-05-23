@@ -15,7 +15,7 @@ export class CustomZodSerializerInterceptor {
     if (request.url === '/metrics') {
       return next.handle() // Bỏ qua /metrics
     }
-    const statusCode = context.switchToHttp().getResponse().statusCode
+    let statusCode = context.switchToHttp().getResponse().statusCode
     // Lấy message từ decorator @Message, mặc định là 'Success' nếu không có
     const defaultMessage = this.reflector.get<string | undefined>(MessageKey, context.getHandler()) ?? 'Successful'
     // Lấy schema từ decorator @ZodSerializerDto
@@ -29,6 +29,7 @@ export class CustomZodSerializerInterceptor {
         // Kiểm tra xem response có phải là object và có chứa message không
         if (response && typeof response === 'object' && 'message' in response) {
           message = response.message || defaultMessage // Ưu tiên message từ response
+          statusCode = response.statusCode || statusCode
           data = {} // Đặt data là object rỗng nếu response có message
         }
 

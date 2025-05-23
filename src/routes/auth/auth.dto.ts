@@ -5,7 +5,9 @@ import {
   GetAllDevicesSchema,
   GetAuthorizationUrlResSchema,
   LoginBodySchema,
+  LoginBodySchema2FA,
   LoginResSchema,
+  LoginResSchema2FA,
   LogoutBodySchema,
   RefreshTokenBodySchema,
   RefreshTokenResSchema,
@@ -25,6 +27,10 @@ export class SendOTPBodyDTO extends createZodDto(SendOTPBodySchema) {}
 export class LoginBodyDTO extends createZodDto(LoginBodySchema) {}
 
 export class LoginResDTO extends createZodDto(LoginResSchema) {}
+
+export class LoginBodyDTO2FA extends createZodDto(LoginBodySchema2FA) {}
+
+export class LoginResDTO2FA extends createZodDto(LoginResSchema2FA) {}
 
 export class RefreshTokenBodyDTO extends createZodDto(RefreshTokenBodySchema) {}
 

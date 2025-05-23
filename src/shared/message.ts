@@ -9,5 +9,6 @@ export const MESSAGES = {
   },
   ERROR: {
     UNKNOWN: 'Something went wrong. Please try again.',
+    NEED_VERIFY_2FA: 'You need to verify two-factor authentication',
   },
 }

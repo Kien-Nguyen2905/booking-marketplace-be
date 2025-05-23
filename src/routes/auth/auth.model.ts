@@ -42,16 +42,23 @@ export const SendOTPBodySchema = VerificationCodeSchema.pick({
 export const LoginBodySchema = UserSchema.pick({
   email: true,
   password: true,
-})
-  .extend({
-    totpCode: z.string().length(6).optional(), // 2FA code
-  })
-  .strict()
+}).strict()
 
 export const LoginResSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string(),
 })
+
+export const LoginBodySchema2FA = UserSchema.pick({
+  email: true,
+  password: true,
+})
+  .extend({
+    totpCode: z.string().length(6), // 2FA code
+  })
+  .strict()
+
+export const LoginResSchema2FA = LoginResSchema
 
 export const RegisterResSchema = LoginResSchema
 
@@ -135,6 +142,8 @@ export type VerificationCodeType = z.infer<typeof VerificationCodeSchema>
 export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>
 export type RegisterBodyType = z.infer<typeof RegisterBodySchema>
 export type LoginBodyType = z.infer<typeof LoginBodySchema>
+export type LoginBodyType2FA = z.infer<typeof LoginBodySchema2FA>
+export type LoginResType2FA = z.infer<typeof LoginResSchema2FA>
 export type DeviceType = z.infer<typeof DeviceSchema>
 export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>
 export type RefreshTokenBodyType = z.infer<typeof RefreshTokenBodySchema>

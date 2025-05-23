@@ -44,21 +44,21 @@ model Customer {
   phoneNumber String    @db.VarChar(20)
   email       String    @db.VarChar(255)
   createdAt   DateTime? @default(now()) @db.Timestamp(6)
-  order       Order?
+  Order       Order?
 }
 
 model Device {
-  id           Int           @id @default(autoincrement())
+  id           Int            @id @default(autoincrement())
   userId       Int
   userAgent    String
-  browser      String?       @db.VarChar(50)
-  os           String?       @db.VarChar(50)
-  deviceType   String?       @db.VarChar(50)
-  isActive     Boolean?      @default(true)
-  lastActive   DateTime?     @default(now()) @db.Timestamp(6)
-  createdAt    DateTime?     @default(now()) @db.Timestamp(6)
-  user         User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  refreshToken RefreshToken?
+  browser      String?        @db.VarChar(50)
+  os           String?        @db.VarChar(50)
+  deviceType   String?        @db.VarChar(50)
+  isActive     Boolean?       @default(true)
+  lastActive   DateTime?      @default(now()) @db.Timestamp(6)
+  createdAt    DateTime?      @default(now()) @db.Timestamp(6)
+  user         User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  refreshToken RefreshToken[]
 
   @@unique([userId, userAgent])
 }
@@ -209,7 +209,7 @@ model Promotion {
 model RefreshToken {
   token     String    @id @db.VarChar(255)
   userId    Int
-  deviceId  Int       @unique
+  deviceId  Int
   expiresAt DateTime  @db.Timestamp(6)
   createdAt DateTime? @default(now()) @db.Timestamp(6)
   device    Device    @relation(fields: [deviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)

@@ -9,7 +9,9 @@ import {
   GetAllDevicesDTO,
   GetAuthorizationUrlResDTO,
   LoginBodyDTO,
+  LoginBodyDTO2FA,
   LoginResDTO,
+  LoginResDTO2FA,
   LogoutBodyDTO,
   RefreshTokenBodyDTO,
   RefreshTokenResDTO,
@@ -51,9 +53,18 @@ export class AuthController {
   @Post('login')
   @IsPublic()
   @ZodSerializerDto(LoginResDTO)
-  @Message('Login successful')
   login(@Body() body: LoginBodyDTO, @UserAgent() userAgent: string) {
     return this.authService.login({
+      ...body,
+      userAgent,
+    })
+  }
+
+  @Post('verify-2fa')
+  @IsPublic()
+  @ZodSerializerDto(LoginResDTO2FA)
+  verify2FA(@Body() body: LoginBodyDTO2FA, @UserAgent() userAgent: string) {
+    return this.authService.loginWith2FA({
       ...body,
       userAgent,
     })
