@@ -21,6 +21,8 @@ export const UserStatus = {
   INACTIVE: 'INACTIVE',
 } as const
 
+export type UserStatusType = (typeof UserStatus)[keyof typeof UserStatus]
+
 export const TypeOfVerificationCode = {
   REGISTER: 'REGISTER',
   FORGOT_PASSWORD: 'FORGOT_PASSWORD',

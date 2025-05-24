@@ -14,7 +14,8 @@ import { BullMQModule } from 'src/bull/bull.module'
 import { PermissionModule } from 'src/routes/permission/permission.module'
 import { RoleModule } from 'src/routes/role/role.module'
 import { ProfileModule } from 'src/routes/profile/profile.module'
-import { MediaModule } from './routes/media/media.module';
+import { MediaModule } from './routes/media/media.module'
+import { UserModule } from 'src/routes/user/user.module'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,6 +30,7 @@ import { MediaModule } from './routes/media/media.module';
     RoleModule,
     ProfileModule,
     MediaModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
