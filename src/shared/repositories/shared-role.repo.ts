@@ -6,6 +6,7 @@ import { PrismaService } from 'src/shared/services/prisma.service'
 export class SharedRoleRepository {
   private customerRoleId: number | null = null
   private adminRoleId: number | null = null
+  private partnerRoleId: number | null = null
 
   constructor(private readonly prismaService: PrismaService) {}
 
@@ -42,6 +43,18 @@ export class SharedRoleRepository {
     const role = await this.getRole(ROLE_NAME.ADMIN)
 
     this.adminRoleId = role.id
+    return role.id
+  }
+
+  // Get partner role id
+  async getPartnerRoleId() {
+    // Check if partner role id is already cached
+    if (this.partnerRoleId) {
+      return this.partnerRoleId
+    }
+    const role = await this.getRole(ROLE_NAME.PARTNER)
+
+    this.partnerRoleId = role.id
     return role.id
   }
 }

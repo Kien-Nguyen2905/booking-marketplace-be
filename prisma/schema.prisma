@@ -69,7 +69,7 @@ model Hotel {
   name             String          @db.VarChar(255)
   hotelPhoneNumber String          @db.VarChar(20)
   type             HotelType
-  reputationCore   Float?          @default(100) @db.Real
+  reputationScore  Float?          @default(100) @db.Real
   rating           Float?          @default(0) @db.Real
   vat              Float           @db.Real
   address          String
@@ -169,8 +169,8 @@ model Partner {
   createdAt      DateTime?      @default(now()) @db.Timestamp(6)
   updatedAt      DateTime?      @default(now()) @db.Timestamp(6)
   Coupon         Coupon[]
-  Hotel          Hotel?
-  User           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotel          Hotel?
+  user           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Permission {

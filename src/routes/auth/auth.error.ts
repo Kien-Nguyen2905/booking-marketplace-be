@@ -1,4 +1,4 @@
-import { ForbiddenException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
+import { UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
 
 // OTP
 export const InvalidOTPException = new UnprocessableEntityException([{ message: 'OTP code is invalid', path: 'code' }])

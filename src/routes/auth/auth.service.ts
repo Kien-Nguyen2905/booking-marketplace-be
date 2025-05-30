@@ -41,7 +41,7 @@ import { TokenService } from 'src/shared/services/token.service'
 import { AccessTokenPayloadCreate } from 'src/shared/types/jwt.type'
 import { InvalidPasswordException } from 'src/shared/error'
 import { MESSAGES } from 'src/shared/message'
-import { MailProducer, MailType } from 'src/shared/producers/mail.producer'
+import { MailProducer } from 'src/shared/producers/mail.producer'
 @Injectable()
 export class AuthService {
   constructor(
@@ -69,6 +69,7 @@ export class AuthService {
     if (body.type === TypeOfVerificationCode.FORGOT_PASSWORD && !user) {
       throw EmailNotFoundException
     }
+
     // Generate and store new OTP
     const code = generateOTP()
     await this.authRepository.createVerificationCode({
@@ -77,12 +78,12 @@ export class AuthService {
       type: body.type,
       expiresAt: addMilliseconds(new Date(), ms(envConfig.OTP_EXPIRES_IN)),
     })
+
     // Send OTP
     await this.mailProducer.sendOtpCodeMail({
       email: body.email,
       code,
     })
-
     return {
       message: MESSAGES.AUTH.OTP_SENT,
     }

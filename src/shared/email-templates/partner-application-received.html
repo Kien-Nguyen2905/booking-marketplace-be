@@ -73,7 +73,7 @@
           color: inherit !important;
           font-family: inherit !important;
           font-size: inherit !important;
-          fontνή: inherit !important;
+          font-weight: inherit !important;
           line-height: inherit !important;
           text-decoration: none !important;
         }
@@ -90,6 +90,7 @@
     </style>
   </head>
   <body
+    class
     style="
       background-color: #eaebed;
       font-family: sans-serif;
@@ -120,7 +121,7 @@
       bgcolor="#eaebed"
     >
       <tr>
-        <td style="font-family: sans-serif; font-size: 14px; vertical-align: top" valign="top"></td>
+        <td style="font-family: sans-serif; font-size: 14px; vertical-align: top" valign="top">&nbsp;</td>
         <td
           class="container"
           style="
@@ -155,7 +156,7 @@
                 visibility: hidden;
                 width: 0;
               "
-              >A new device has logged into your Booking account.</span
+              >Your partner application has been received.</span
             >
             <table
               role="presentation"
@@ -209,7 +210,7 @@
                             margin-bottom: 15px;
                           "
                         >
-                          A new device has logged into your Booking account.
+                          Dear {{partnerName}},
                         </p>
                         <p
                           style="
@@ -220,9 +221,7 @@
                             margin-bottom: 15px;
                           "
                         >
-                          <strong>Browser:</strong>{{browser}} {{device}}<br />
-                          <strong>Operating System:</strong> {{os}}<br />
-                          <strong>Login Time:</strong> {{loginTime}}
+                          Thank you for applying to become a partner on our Booking Marketplace platform.
                         </p>
                         <p
                           style="
@@ -233,20 +232,55 @@
                             margin-bottom: 15px;
                           "
                         >
-                          If this was not you, please secure your account by logging out the device or changing your
-                          password.
+                          Your application has been successfully received and is currently under review by our team. We will carefully evaluate your profile, services, and qualifications.
+                        </p>
+                        <p
+                          style="
+                            font-family: sans-serif;
+                            font-size: 14px;
+                            font-weight: normal;
+                            margin: 0;
+                            margin-bottom: 15px;
+                          "
+                        >
+                          You should expect to hear back from us within 3-5 business days regarding the status of your application.
+                        </p>
+                        <p
+                          style="
+                            font-family: sans-serif;
+                            font-size: 14px;
+                            font-weight: normal;
+                            margin: 0;
+                            margin-bottom: 15px;
+                          "
+                        >
+                          If you have any questions in the meantime, please don't hesitate to contact our partner support team.
+                        </p>
+                        <p
+                          style="
+                            font-family: sans-serif;
+                            font-size: 14px;
+                            font-weight: normal;
+                            margin: 0;
+                            margin-bottom: 15px;
+                          "
+                        >
+                          Best regards,<br />
+                          The Booking Marketplace Team
                         </p>
                       </td>
                     </tr>
                   </table>
                 </td>
               </tr>
+
               <!-- END MAIN CONTENT AREA -->
             </table>
+
             <!-- END CENTERED WHITE CONTAINER -->
           </div>
         </td>
-        <td style="font-family: sans-serif; font-size: 14px; vertical-align: top" valign="top"></td>
+        <td style="font-family: sans-serif; font-size: 14px; vertical-align: top" valign="top">&nbsp;</td>
       </tr>
     </table>
   </body>

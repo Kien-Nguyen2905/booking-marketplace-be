@@ -57,14 +57,6 @@ async function bootstrap() {
     // Delete permissions that no longer exist
     if (permissionsToDelete.length > 0) {
       await prisma.$transaction(async (prisma) => {
-        const deleteResult = await prisma.permission.deleteMany({
-          where: {
-            id: {
-              in: permissionsToDelete.map((item) => item.id),
-            },
-          },
-        })
-        console.log('Soft-deleted permissions:', deleteResult.count)
         const deletePermissionToRoleResult = await prisma.permissionToRole.deleteMany({
           where: {
             permissionId: {
@@ -72,7 +64,16 @@ async function bootstrap() {
             },
           },
         })
-        console.log('Soft-deleted permissionToRole:', deletePermissionToRoleResult.count)
+        console.log('Deleted permissionToRole:', deletePermissionToRoleResult.count)
+
+        const deleteResult = await prisma.permission.deleteMany({
+          where: {
+            id: {
+              in: permissionsToDelete.map((item) => item.id),
+            },
+          },
+        })
+        console.log('Deleted permissions:', deleteResult.count)
       })
     } else {
       console.log('No permissions to delete')

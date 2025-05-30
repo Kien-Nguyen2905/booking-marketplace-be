@@ -1,4 +1,5 @@
 import { UserStatus } from 'src/shared/constants/auth.constant'
+import { PartnerStatus } from 'src/shared/constants/partner.constant'
 import { PermissionSchema } from 'src/shared/models/shared-permission.model'
 import { RoleSchema } from 'src/shared/models/shared-role.model'
 import { z } from 'zod'
@@ -50,6 +51,10 @@ export const GetUserProfileResSchema = UserSchema.omit({
       }),
     ),
   }),
+  partnerStatus: z
+    .enum([PartnerStatus.PENDING, PartnerStatus.ACCEPTED, PartnerStatus.REJECTED])
+    .nullable()
+    .default(PartnerStatus.PENDING),
 })
 
 /**

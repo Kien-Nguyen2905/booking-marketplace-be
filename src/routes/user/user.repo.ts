@@ -61,4 +61,13 @@ export class UserRepo {
       },
     })
   }
+
+  async updateRole({ data, userId }: { data: { roleId: number }; userId: number }) {
+    return await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data,
+    })
+  }
 }

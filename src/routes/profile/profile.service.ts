@@ -5,11 +5,13 @@ import { SharedUserRepository } from 'src/shared/repositories/shared-user.repo'
 import { HashingService } from 'src/shared/services/hashing.service'
 import { isUniqueConstraintPrismaError } from 'src/shared/helpers'
 import { MESSAGES } from 'src/shared/message'
+import { PartnerRepo } from 'src/routes/partner/partner.repo'
 
 @Injectable()
 export class ProfileService {
   constructor(
     private readonly sharedUserRepository: SharedUserRepository,
+    private readonly partnerRepo: PartnerRepo,
     private readonly hashingService: HashingService,
   ) {}
 
@@ -21,8 +23,11 @@ export class ProfileService {
     if (!user) {
       throw NotFoundRecordException
     }
-
-    return user
+    const partner = await this.partnerRepo.getPartnerByUserId(userId)
+    return {
+      ...user,
+      partnerStatus: partner?.status || null,
+    }
   }
 
   async updateProfile({ userId, body }: { userId: number; body: UpdateMeBodyType }) {

@@ -13,19 +13,16 @@ export class MailConsumer extends WorkerHost {
   async process(job: Job<MailData>) {
     switch (job.data.type) {
       case MailType.OTP: {
-        console.log(job)
         const data = job.data.data as PayloadSendCode
         await this.mailService.sendOTP(data)
         break
       }
       case MailType.TWO_FA: {
-        console.log(job)
         const data = job.data.data as PayloadSendCode
         await this.mailService.send2FA(data)
         break
       }
       case MailType.NEW_DEVICE_LOGIN: {
-        console.log(job)
         const data = job.data.data as PayloadSendNewDeviceLogin
         await this.mailService.sendNewDeviceNotification(data)
         break

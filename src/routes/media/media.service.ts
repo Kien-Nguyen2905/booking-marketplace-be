@@ -15,4 +15,11 @@ export class MediaService {
       url,
     }
   }
+
+  async deleteOldFiles(oldFileKeys: string[] | undefined) {
+    if (oldFileKeys && oldFileKeys.length > 0) {
+      await this.s3Service.deleteFiles(oldFileKeys)
+      return { message: 'Old files deleted successfully' }
+    }
+  }
 }

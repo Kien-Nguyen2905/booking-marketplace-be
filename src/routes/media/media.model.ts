@@ -12,4 +12,10 @@ export const PresignedUploadFileResSchema = z.object({
   url: z.string(),
 })
 
+export const DeleteFilesBodySchema = z.object({
+  oldFileKeys: z.array(z.string()),
+})
+
+export type DeleteFilesBodyType = z.infer<typeof DeleteFilesBodySchema>
+
 export type PresignedUploadFileBodyType = z.infer<typeof PresignedUploadFileBodySchema>

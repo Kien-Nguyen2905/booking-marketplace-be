@@ -16,6 +16,8 @@ import { RoleModule } from 'src/routes/role/role.module'
 import { ProfileModule } from 'src/routes/profile/profile.module'
 import { MediaModule } from './routes/media/media.module'
 import { UserModule } from 'src/routes/user/user.module'
+import { PartnerModule } from './routes/partner/partner.module';
+import { HotelModule } from './routes/hotel/hotel.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,6 +33,8 @@ import { UserModule } from 'src/routes/user/user.module'
     ProfileModule,
     MediaModule,
     UserModule,
+    PartnerModule,
+    HotelModule,
   ],
   controllers: [AppController],
   providers: [
