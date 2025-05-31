@@ -1,10 +1,15 @@
 import { createZodDto } from 'nestjs-zod'
 import {
+  CreateHotelAmenityBodySchema,
+  CreateHotelAmenityResSchema,
   CreateHotelBodySchema,
   CreateHotelResSchema,
+  GetHotelAmenitiesResSchema,
   GetHotelResSchema,
   GetHotelsQuerySchema,
   GetHotelsResSchema,
+  UpdateHotelAmenitiesBodySchema,
+  UpdateHotelAmenitiesResSchema,
   UpdateHotelBodySchema,
   UpdateHotelResSchema,
 } from 'src/routes/hotel/hotel.model'
@@ -19,3 +24,11 @@ export class UpdateHotelBodyDTO extends createZodDto(UpdateHotelBodySchema) {}
 
 export class GetHotelsResDTO extends createZodDto(GetHotelsResSchema) {}
 export class GetHotelsQueryDTO extends createZodDto(GetHotelsQuerySchema) {}
+
+export class CreateHotelAmenityBodyDTO extends createZodDto(CreateHotelAmenityBodySchema) {}
+export class CreateHotelAmenityResDTO extends createZodDto(CreateHotelAmenityResSchema) {}
+
+export class GetHotelAmenitiesResDTO extends createZodDto(GetHotelAmenitiesResSchema) {}
+
+export class UpdateHotelAmenitiesBodyDTO extends createZodDto(UpdateHotelAmenitiesBodySchema) {}
+export class UpdateHotelAmenitiesResDTO extends createZodDto(UpdateHotelAmenitiesResSchema) {}

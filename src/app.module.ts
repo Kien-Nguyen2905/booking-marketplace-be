@@ -18,6 +18,7 @@ import { MediaModule } from './routes/media/media.module'
 import { UserModule } from 'src/routes/user/user.module'
 import { PartnerModule } from './routes/partner/partner.module';
 import { HotelModule } from './routes/hotel/hotel.module';
+import { AmenityModule } from './routes/amenity/amenity.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,6 +36,7 @@ import { HotelModule } from './routes/hotel/hotel.module';
     UserModule,
     PartnerModule,
     HotelModule,
+    AmenityModule,
   ],
   controllers: [AppController],
   providers: [

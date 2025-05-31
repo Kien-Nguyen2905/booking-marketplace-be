@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { HotelRepo } from './hotel.repo'
-import { CreateHotelBodyType, GetHotelsQueryType, UpdateHotelBodyType } from 'src/routes/hotel/hotel.model'
-import { HotelAlreadyExistsException, HotelNotFoundException } from './hotel.error'
+import {
+  CreateHotelAmenityBodyType,
+  CreateHotelBodyType,
+  GetHotelsQueryType,
+  UpdateHotelAmenitiesBodyType,
+  UpdateHotelBodyType,
+} from 'src/routes/hotel/hotel.model'
+import { HotelAlreadyExistsException, HotelAmenityAlreadyExistsException, HotelNotFoundException } from './hotel.error'
 import { isUniqueConstraintPrismaError } from 'src/shared/helpers'
 
 @Injectable()
@@ -44,5 +50,34 @@ export class HotelService {
       }
       throw error
     }
+  }
+
+  async checkHotelExist(hotelId: number) {
+    const hotel = await this.hotelRepo.find(hotelId)
+    if (!hotel) {
+      throw HotelNotFoundException
+    }
+  }
+
+  async createAmenity(data: CreateHotelAmenityBodyType) {
+    try {
+      await this.checkHotelExist(data.hotelId)
+      return await this.hotelRepo.createAmenity({ data })
+    } catch (error) {
+      if (isUniqueConstraintPrismaError(error)) {
+        throw HotelAmenityAlreadyExistsException
+      }
+      throw error
+    }
+  }
+
+  async findAmenitiesByHotelId(hotelId: number) {
+    await this.checkHotelExist(hotelId)
+    return await this.hotelRepo.findAmenitiesByHotelId(hotelId)
+  }
+
+  async updateAmenities({ data, hotelId }: { data: UpdateHotelAmenitiesBodyType; hotelId: number }) {
+    await this.checkHotelExist(hotelId)
+    return await this.hotelRepo.updateAmenities({ data, hotelId })
   }
 }

@@ -1,0 +1,6 @@
+export const AMENITY_CATEGORY = {
+  ROOM: 'ROOM',
+  PUBLIC: 'PUBLIC',
+  SERVICE: 'SERVICE',
+}
+export type AMENITY_CATEGORY_TYPE = keyof typeof AMENITY_CATEGORY

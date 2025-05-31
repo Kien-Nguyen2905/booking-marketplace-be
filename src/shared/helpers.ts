@@ -42,3 +42,8 @@ export const generateRandomFilename = (filename: string) => {
   const ext = path.extname(filename)
   return `${Date.now() + '-' + Math.round(Math.random() * 1e9)}${ext}`
 }
+
+export const capitalizeFirst = (input: string): string => {
+  const trimmed = input.trim().toLowerCase()
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
+}

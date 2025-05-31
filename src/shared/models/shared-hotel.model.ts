@@ -11,7 +11,7 @@ export const HotelSchema = z.object({
     HotelType.HOSTEL,
     HotelType.APARTMENT,
     HotelType.GUESTHOUSE,
-    HotelType.HOMESTAY,
+    HotelType.HOME_STAY,
     HotelType.VILLA,
     HotelType.RESORT,
   ]),
@@ -28,5 +28,13 @@ export const HotelSchema = z.object({
   createdAt: z.date().nullable(),
   updatedAt: z.date().nullable(),
 })
+
+export const HotelAmenitySchema = z.object({
+  id: z.number(),
+  hotelId: z.number(),
+  amenityId: z.number(),
+})
+
+export type HotelAmenityType = z.infer<typeof HotelAmenitySchema>
 
 export type HotelType = z.infer<typeof HotelSchema>

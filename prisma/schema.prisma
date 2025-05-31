@@ -9,11 +9,14 @@ datasource db {
 }
 
 model Amenity {
-  id            Int             @id @default(autoincrement())
-  name          String          @unique @db.VarChar(100)
-  category      CategoryType
-  createdAt     DateTime?       @default(now()) @db.Timestamp(6)
-  ObjectAmenity ObjectAmenity[]
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(100)
+  category        CategoryType
+  createdAt       DateTime?         @default(now()) @db.Timestamp(6)
+  hotelAmenity    HotelAmenity[]
+  roomTypeAmenity RoomTypeAmenity[]
+
+  @@unique([name, category])
 }
 
 model Coupon {
@@ -64,30 +67,40 @@ model Device {
 }
 
 model Hotel {
-  id               Int             @id @default(autoincrement())
-  partnerId        Int             @unique
-  name             String          @db.VarChar(255)
-  hotelPhoneNumber String          @db.VarChar(20)
+  id               Int            @id @default(autoincrement())
+  partnerId        Int            @unique
+  name             String         @db.VarChar(255)
+  hotelPhoneNumber String         @db.VarChar(20)
   type             HotelType
-  reputationScore  Float?          @default(100) @db.Real
-  rating           Float?          @default(0) @db.Real
-  vat              Float           @db.Real
+  reputationScore  Float?         @default(100) @db.Real
+  rating           Float?         @default(0) @db.Real
+  vat              Float          @db.Real
   address          String
   provinceCode     Int
   districtCode     Int
   wardCode         Int
   description      String
   images           String[]
-  status           HotelStatus?    @default(PENDING)
-  createdAt        DateTime?       @default(now()) @db.Timestamp(6)
-  updatedAt        DateTime?       @default(now()) @db.Timestamp(6)
-  Partner          Partner         @relation(fields: [partnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ObjectAmenity    ObjectAmenity[]
+  status           HotelStatus?   @default(PENDING)
+  createdAt        DateTime?      @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime?      @default(now()) @db.Timestamp(6)
+  Partner          Partner        @relation(fields: [partnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  HotelAmenity     HotelAmenity[]
   Order            Order[]
   Review           Review[]
   Room             Room[]
   RoomType         RoomType[]
   Wishlist         Wishlist[]
+}
+
+model HotelAmenity {
+  id        Int     @id @default(autoincrement())
+  hotelId   Int
+  amenityId Int
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotel     Hotel   @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([hotelId, amenityId])
 }
 
 model Notify {
@@ -102,15 +115,6 @@ model Notify {
   updatedAt                     DateTime?  @default(now()) @db.Timestamp(6)
   User_Notify_createdByIdToUser User       @relation("Notify_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User_Notify_recipientIdToUser User       @relation("Notify_recipientIdToUser", fields: [recipientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model ObjectAmenity {
-  id        Int      @id @default(autoincrement())
-  objectId  Int
-  amenityId Int
-  Amenity   Amenity  @relation(fields: [amenityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  RoomType  RoomType @relation(fields: [objectId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Hotel     Hotel    @relation(fields: [objectId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ObjectAmenity_objectId_fkey1")
 }
 
 model Order {
@@ -225,7 +229,7 @@ model Refund {
   createdById Int
   createdAt   DateTime?     @default(now()) @db.Timestamp(6)
   updatedAt   DateTime?     @default(now()) @db.Timestamp(6)
-  user        User          @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User        User          @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Review {
@@ -298,23 +302,33 @@ model RoomBlock {
 }
 
 model RoomType {
-  id             Int             @id @default(autoincrement())
-  hotelId        Int
-  roomType       String          @db.VarChar(100)
-  adults         Int
-  child          Int?            @default(0)
-  roomBedId      Int
-  area           Int
-  serviceFeeRate Float           @db.Real
-  description    String
-  images         String[]
-  deletedAt      DateTime?       @db.Timestamp(6)
-  createdAt      DateTime?       @default(now()) @db.Timestamp(6)
-  updatedAt      DateTime?       @default(now()) @db.Timestamp(6)
-  ObjectAmenity  ObjectAmenity[]
-  Room           Room[]
-  Hotel          Hotel           @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  RoomBed        RoomBed         @relation(fields: [roomBedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              Int               @id @default(autoincrement())
+  hotelId         Int
+  roomType        String            @db.VarChar(100)
+  adults          Int
+  child           Int?              @default(0)
+  roomBedId       Int
+  area            Int
+  serviceFeeRate  Float             @db.Real
+  description     String
+  images          String[]
+  deletedAt       DateTime?         @db.Timestamp(6)
+  createdAt       DateTime?         @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime?         @default(now()) @db.Timestamp(6)
+  Room            Room[]
+  Hotel           Hotel             @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RoomBed         RoomBed           @relation(fields: [roomBedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RoomTypeAmenity RoomTypeAmenity[]
+}
+
+model RoomTypeAmenity {
+  id         Int      @id @default(autoincrement())
+  roomTypeId Int
+  amenityId  Int
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([roomTypeId, amenityId])
 }
 
 model Transaction {
@@ -368,7 +382,7 @@ model User {
   User                            User?          @relation("UserToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
   other_User                      User[]         @relation("UserToUser")
   role                            Role           @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  wishlist                        Wishlist[]
+  Wishlist                        Wishlist[]
 }
 
 model VerificationCode {
@@ -426,7 +440,7 @@ enum HotelType {
   HOSTEL
   APARTMENT
   GUESTHOUSE
-  HOMESTAY
+  HOME_STAY
   VILLA
   RESORT
 }

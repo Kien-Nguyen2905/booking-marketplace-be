@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common'
-import { CreateHotelBodyType, GetHotelsQueryType, UpdateHotelBodyType } from 'src/routes/hotel/hotel.model'
+import {
+  CreateHotelAmenityBodyType,
+  CreateHotelBodyType,
+  GetHotelsQueryType,
+  UpdateHotelAmenitiesBodyType,
+  UpdateHotelBodyType,
+} from 'src/routes/hotel/hotel.model'
 import { HotelStatusType } from 'src/shared/constants/hotel.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { S3Service } from 'src/shared/services/s3.service'
@@ -92,6 +98,48 @@ export class HotelRepo {
         vat: data.vat / 100,
         updatedAt: new Date(),
       },
+    })
+  }
+
+  async createAmenity({ data }: { data: CreateHotelAmenityBodyType }) {
+    return await this.prismaService.hotelAmenity.create({
+      data,
+    })
+  }
+
+  async findAmenitiesByHotelId(hotelId: number) {
+    const amenities = await this.prismaService.hotelAmenity.findMany({
+      where: { hotelId },
+      select: {
+        amenity: true,
+      },
+    })
+    return amenities.map((amenity) => amenity.amenity)
+  }
+
+  async updateAmenities({ data, hotelId }: { data: UpdateHotelAmenitiesBodyType; hotelId: number }) {
+    // Bắt đầu một transaction để đảm bảo tính toàn vẹn dữ liệu
+    return await this.prismaService.$transaction(async (prisma) => {
+      // Xóa tất cả các bản ghi HotelAmenity hiện có cho hotelId
+      await prisma.hotelAmenity.deleteMany({
+        where: { hotelId: hotelId },
+      })
+
+      // Tạo các bản ghi mới trong HotelAmenity
+      const hotelAmenities = data.amenities.map((amenityId) => ({
+        hotelId: hotelId,
+        amenityId: amenityId,
+      }))
+
+      await prisma.hotelAmenity.createMany({
+        data: hotelAmenities,
+      })
+
+      // Trả về danh sách Amenities mới được liên kết
+      return await prisma.hotelAmenity.findMany({
+        where: { hotelId: hotelId },
+        include: { amenity: true },
+      })
     })
   }
 }

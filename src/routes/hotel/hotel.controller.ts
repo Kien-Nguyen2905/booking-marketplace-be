@@ -2,14 +2,19 @@ import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { HotelService } from './hotel.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import {
+  CreateHotelAmenityBodyDTO,
+  CreateHotelAmenityResDTO,
   CreateHotelBodyDTO,
   CreateHotelResDTO,
   GetHotelResDTO,
   GetHotelsQueryDTO,
   GetHotelsResDTO,
+  UpdateHotelAmenitiesBodyDTO,
+  UpdateHotelAmenitiesResDTO,
   UpdateHotelBodyDTO,
   UpdateHotelResDTO,
 } from 'src/routes/hotel/hotel.dto'
+import { GetAmenitiesResDTO } from 'src/routes/amenity/amenity.dto'
 
 @Controller('hotels')
 export class HotelController {
@@ -46,5 +51,23 @@ export class HotelController {
       data: body,
       id: +id,
     })
+  }
+
+  @Post('amenities')
+  @ZodSerializerDto(CreateHotelAmenityResDTO)
+  async createAmenity(@Body() body: CreateHotelAmenityBodyDTO) {
+    return await this.hotelService.createAmenity(body)
+  }
+
+  @Get('amenities/:hotelId')
+  @ZodSerializerDto(GetAmenitiesResDTO)
+  async findAmenitiesByHotelId(@Param('hotelId') hotelId: string) {
+    return await this.hotelService.findAmenitiesByHotelId(+hotelId)
+  }
+
+  @Put('amenities/:hotelId')
+  @ZodSerializerDto(UpdateHotelAmenitiesResDTO)
+  async updateAmenities(@Body() body: UpdateHotelAmenitiesBodyDTO, @Param('hotelId') hotelId: string) {
+    return await this.hotelService.updateAmenities({ data: body, hotelId: +hotelId })
   }
 }

@@ -11,7 +11,7 @@ CREATE TYPE "HTTPMethod" AS ENUM ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTI
 CREATE TYPE "HotelStatus" AS ENUM ('PENDING', 'ACTIVE', 'INACTIVE');
 
 -- CreateEnum
-CREATE TYPE "HotelType" AS ENUM ('HOTEL', 'HOSTEL', 'APARTMENT', 'GUESTHOUSE', 'HOMESTAY', 'VILLA', 'RESORT');
+CREATE TYPE "HotelType" AS ENUM ('HOTEL', 'HOSTEL', 'APARTMENT', 'GUESTHOUSE', 'HOME_STAY', 'VILLA', 'RESORT');
 
 -- CreateEnum
 CREATE TYPE "NotifyType" AS ENUM ('REFUND', 'DEMAND', 'INFORM');
@@ -107,7 +107,7 @@ CREATE TABLE "Hotel" (
     "name" VARCHAR(255) NOT NULL,
     "hotelPhoneNumber" VARCHAR(20) NOT NULL,
     "type" "HotelType" NOT NULL,
-    "reputationCore" REAL DEFAULT 100,
+    "reputationScore" REAL DEFAULT 100,
     "rating" REAL DEFAULT 0,
     "vat" REAL NOT NULL,
     "address" TEXT NOT NULL,
@@ -124,6 +124,15 @@ CREATE TABLE "Hotel" (
 );
 
 -- CreateTable
+CREATE TABLE "HotelAmenity" (
+    "id" SERIAL NOT NULL,
+    "hotelId" INTEGER NOT NULL,
+    "amenityId" INTEGER NOT NULL,
+
+    CONSTRAINT "HotelAmenity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Notify" (
     "id" SERIAL NOT NULL,
     "recipientId" INTEGER NOT NULL,
@@ -136,15 +145,6 @@ CREATE TABLE "Notify" (
     "updatedAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Notify_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "ObjectAmenity" (
-    "id" SERIAL NOT NULL,
-    "objectId" INTEGER NOT NULL,
-    "amenityId" INTEGER NOT NULL,
-
-    CONSTRAINT "ObjectAmenity_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -359,6 +359,15 @@ CREATE TABLE "RoomType" (
 );
 
 -- CreateTable
+CREATE TABLE "RoomTypeAmenity" (
+    "id" SERIAL NOT NULL,
+    "roomTypeId" INTEGER NOT NULL,
+    "amenityId" INTEGER NOT NULL,
+
+    CONSTRAINT "RoomTypeAmenity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Transaction" (
     "id" SERIAL NOT NULL,
     "gateway" VARCHAR(100) NOT NULL,
@@ -425,9 +434,6 @@ CREATE TABLE "Wishlist" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Amenity_name_key" ON "Amenity"("name");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Hotel_partnerId_key" ON "Hotel"("partnerId");
 
 -- CreateIndex
@@ -470,19 +476,16 @@ ALTER TABLE "Device" ADD CONSTRAINT "Device_userId_fkey" FOREIGN KEY ("userId") 
 ALTER TABLE "Hotel" ADD CONSTRAINT "Hotel_partnerId_fkey" FOREIGN KEY ("partnerId") REFERENCES "Partner"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE "HotelAmenity" ADD CONSTRAINT "HotelAmenity_amenityId_fkey" FOREIGN KEY ("amenityId") REFERENCES "Amenity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "HotelAmenity" ADD CONSTRAINT "HotelAmenity_hotelId_fkey" FOREIGN KEY ("hotelId") REFERENCES "Hotel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE "Notify" ADD CONSTRAINT "Notify_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "Notify" ADD CONSTRAINT "Notify_recipientId_fkey" FOREIGN KEY ("recipientId") REFERENCES "User"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "ObjectAmenity" ADD CONSTRAINT "ObjectAmenity_amenityId_fkey" FOREIGN KEY ("amenityId") REFERENCES "Amenity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "ObjectAmenity" ADD CONSTRAINT "ObjectAmenity_objectId_fkey" FOREIGN KEY ("objectId") REFERENCES "RoomType"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "ObjectAmenity" ADD CONSTRAINT "ObjectAmenity_objectId_fkey1" FOREIGN KEY ("objectId") REFERENCES "Hotel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "Coupon"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
@@ -549,6 +552,12 @@ ALTER TABLE "RoomType" ADD CONSTRAINT "RoomType_hotelId_fkey" FOREIGN KEY ("hote
 
 -- AddForeignKey
 ALTER TABLE "RoomType" ADD CONSTRAINT "RoomType_roomBedId_fkey" FOREIGN KEY ("roomBedId") REFERENCES "RoomBed"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "RoomTypeAmenity" ADD CONSTRAINT "RoomTypeAmenity_amenityId_fkey" FOREIGN KEY ("amenityId") REFERENCES "Amenity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "RoomTypeAmenity" ADD CONSTRAINT "RoomTypeAmenity_roomTypeId_fkey" FOREIGN KEY ("roomTypeId") REFERENCES "RoomType"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

@@ -11,7 +11,7 @@ export const HotelType = {
   HOSTEL: 'HOSTEL',
   APARTMENT: 'APARTMENT',
   GUESTHOUSE: 'GUESTHOUSE',
-  HOMESTAY: 'HOMESTAY',
+  HOME_STAY: 'HOME_STAY',
   VILLA: 'VILLA',
   RESORT: 'RESORT',
 } as const
