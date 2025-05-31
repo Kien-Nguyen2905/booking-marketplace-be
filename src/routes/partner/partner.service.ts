@@ -53,11 +53,11 @@ export class PartnerService {
       const [partner] = await Promise.all([
         this.partnerRepo.create({ data: partnerData, userId }),
         this.authRepository.deleteVerificationCode({
-          email_code_type: {
+          email_type: {
             email: data.email,
-            code: data.code,
             type: TypeOfVerificationCode.VERIFY,
           },
+          code: data.code,
         }),
       ])
       return partner
@@ -85,19 +85,18 @@ export class PartnerService {
     const [partner] = await Promise.all([
       this.partnerRepo.update({ data: partnerData, userId }),
       this.authRepository.deleteVerificationCode({
-        email_code_type: {
+        email_type: {
           email: data.email,
-          code: data.code,
           type: TypeOfVerificationCode.VERIFY,
         },
+        code: data.code,
       }),
     ])
     return partner
   }
 
   async findByUserId(userId: number) {
-    const partner = await this.partnerRepo.getPartnerByUserId(userId)
-    return partner
+    return await this.partnerRepo.getPartnerByUserId(userId)
   }
 
   async findById(id: number) {

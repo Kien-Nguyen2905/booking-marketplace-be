@@ -379,7 +379,7 @@ model VerificationCode {
   expiresAt DateTime             @db.Timestamp(6)
   createdAt DateTime?            @default(now()) @db.Timestamp(6)
 
-  @@unique([email, code, type])
+  @@unique([email, type])
   @@index([expiresAt])
 }
 

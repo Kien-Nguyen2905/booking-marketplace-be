@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common'
-import { REQUEST_ROLE_PERMISSIONS, REQUEST_USER_KEY } from 'src/shared/constants/auth.constant'
+import { UserInactiveException } from 'src/routes/auth/auth.error'
+import { REQUEST_ROLE_PERMISSIONS, REQUEST_USER_KEY, UserStatus } from 'src/shared/constants/auth.constant'
 import { HTTPMethod } from 'src/shared/constants/role.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { TokenService } from 'src/shared/services/token.service'
@@ -14,8 +15,12 @@ export class AccessTokenGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
+
     // Extract và validate token
     const decodedAccessToken = await this.extractAndValidateToken(request)
+
+    // Validate user status
+    await this.validateUserStatus(decodedAccessToken)
 
     // Check user permission
     await this.validateUserPermission(decodedAccessToken, request)
@@ -72,5 +77,16 @@ export class AccessTokenGuard implements CanActivate {
       throw new ForbiddenException()
     }
     request[REQUEST_ROLE_PERMISSIONS] = { ...role, permissions: role.PermissionToRole.map((ptr) => ptr.permission) }
+  }
+
+  private async validateUserStatus(decodedAccessToken: AccessTokenPayload): Promise<void> {
+    const user = await this.prismaService.user.findUniqueOrThrow({
+      where: {
+        id: decodedAccessToken.userId,
+      },
+    })
+    if (user.status === UserStatus.INACTIVE) {
+      throw UserInactiveException
+    }
   }
 }

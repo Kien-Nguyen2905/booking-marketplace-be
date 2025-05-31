@@ -99,11 +99,11 @@ export class AuthService {
     type: TypeOfVerificationCodeType
   }) {
     const verificationCode = await this.authRepository.findUniqueVerificationCode({
-      email_code_type: {
+      email_type: {
         email,
-        code,
         type,
       },
+      code,
     })
     if (!verificationCode) {
       throw InvalidOTPException
@@ -137,11 +137,11 @@ export class AuthService {
           roleId: customerRoleId,
         }),
         this.authRepository.deleteVerificationCode({
-          email_code_type: {
+          email_type: {
             email: body.email,
-            code: body.code,
             type: TypeOfVerificationCode.REGISTER,
           },
+          code: body.code,
         }),
       ])
       // Create device
@@ -434,11 +434,11 @@ export class AuthService {
         },
       ),
       this.authRepository.deleteVerificationCode({
-        email_code_type: {
+        email_type: {
           email: body.email,
-          code: body.code,
           type: TypeOfVerificationCode.FORGOT_PASSWORD,
         },
+        code: body.code,
       }),
     ])
     return {

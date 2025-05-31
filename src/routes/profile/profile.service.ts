@@ -23,6 +23,7 @@ export class ProfileService {
     if (!user) {
       throw NotFoundRecordException
     }
+
     const partner = await this.partnerRepo.getPartnerByUserId(userId)
     return {
       ...user,
