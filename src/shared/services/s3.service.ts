@@ -40,7 +40,7 @@ export class S3Service {
   createPresignedUrlWithClient(filename: string) {
     const contentType = mime.lookup(filename) || 'application/octet-stream'
     const command = new PutObjectCommand({ Bucket: envConfig.S3_BUCKET_NAME, Key: filename, ContentType: contentType })
-    return getSignedUrl(this.s3, command, { expiresIn: 10 })
+    return getSignedUrl(this.s3, command, { expiresIn: 30 })
   }
 
   async deleteFiles(keys: string[]) {
