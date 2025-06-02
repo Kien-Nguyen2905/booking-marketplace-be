@@ -16,9 +16,10 @@ import { RoleModule } from 'src/routes/role/role.module'
 import { ProfileModule } from 'src/routes/profile/profile.module'
 import { MediaModule } from './routes/media/media.module'
 import { UserModule } from 'src/routes/user/user.module'
-import { PartnerModule } from './routes/partner/partner.module';
-import { HotelModule } from './routes/hotel/hotel.module';
-import { AmenityModule } from './routes/amenity/amenity.module';
+import { PartnerModule } from './routes/partner/partner.module'
+import { HotelModule } from './routes/hotel/hotel.module'
+import { AmenityModule } from './routes/amenity/amenity.module'
+import { RoomTypeModule } from './routes/room-type/room-type.module'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,6 +38,7 @@ import { AmenityModule } from './routes/amenity/amenity.module';
     PartnerModule,
     HotelModule,
     AmenityModule,
+    RoomTypeModule,
   ],
   controllers: [AppController],
   providers: [

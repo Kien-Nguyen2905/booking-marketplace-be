@@ -320,6 +320,7 @@ CREATE TABLE "RoomAvailability" (
 -- CreateTable
 CREATE TABLE "RoomBed" (
     "id" SERIAL NOT NULL,
+    "roomTypeId" INTEGER NOT NULL,
     "roomBedType" "RoomBedType" NOT NULL,
     "quantity" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
@@ -346,7 +347,6 @@ CREATE TABLE "RoomType" (
     "roomType" VARCHAR(100) NOT NULL,
     "adults" INTEGER NOT NULL,
     "child" INTEGER DEFAULT 0,
-    "roomBedId" INTEGER NOT NULL,
     "area" INTEGER NOT NULL,
     "serviceFeeRate" REAL NOT NULL,
     "description" TEXT NOT NULL,
@@ -545,13 +545,13 @@ ALTER TABLE "Room" ADD CONSTRAINT "Room_roomTypeId_fkey" FOREIGN KEY ("roomTypeI
 ALTER TABLE "RoomAvailability" ADD CONSTRAINT "RoomAvailability_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "Room"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE "RoomBed" ADD CONSTRAINT "RoomBed_roomTypeId_fkey" FOREIGN KEY ("roomTypeId") REFERENCES "RoomType"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE "RoomBlock" ADD CONSTRAINT "RoomBlock_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "Room"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "RoomType" ADD CONSTRAINT "RoomType_hotelId_fkey" FOREIGN KEY ("hotelId") REFERENCES "Hotel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "RoomType" ADD CONSTRAINT "RoomType_roomBedId_fkey" FOREIGN KEY ("roomBedId") REFERENCES "RoomBed"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "RoomTypeAmenity" ADD CONSTRAINT "RoomTypeAmenity_amenityId_fkey" FOREIGN KEY ("amenityId") REFERENCES "Amenity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

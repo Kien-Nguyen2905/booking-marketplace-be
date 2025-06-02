@@ -3,14 +3,21 @@ import { randomInt } from 'crypto'
 import { UAParser } from 'ua-parser-js'
 import path from 'path'
 // Type Predicate
+
+// Unique constraint violation
+// Error code: P2002 occurred when trying to create a record with a unique constraint violation.
 export function isUniqueConstraintPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
 }
 
+// Not found
+// Error code: P2025 occurred when trying to create or update a record that references a non-existent foreign key.
 export function isNotFoundPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'
 }
 
+// Foreign key constraint violation
+// Error code: P2003 occurred when trying to create or update a record that references a non-existent foreign key.
 export function isForeignKeyConstraintPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003'
 }

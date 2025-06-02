@@ -13,8 +13,8 @@ model Amenity {
   name            String            @db.VarChar(100)
   category        CategoryType
   createdAt       DateTime?         @default(now()) @db.Timestamp(6)
-  hotelAmenity    HotelAmenity[]
-  roomTypeAmenity RoomTypeAmenity[]
+  HotelAmenity    HotelAmenity[]
+  RoomTypeAmenity RoomTypeAmenity[]
 
   @@unique([name, category])
 }
@@ -60,8 +60,8 @@ model Device {
   isActive     Boolean?       @default(true)
   lastActive   DateTime?      @default(now()) @db.Timestamp(6)
   createdAt    DateTime?      @default(now()) @db.Timestamp(6)
-  user         User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  refreshToken RefreshToken[]
+  User         User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RefreshToken RefreshToken[]
 
   @@unique([userId, userAgent])
 }
@@ -174,7 +174,7 @@ model Partner {
   updatedAt      DateTime?      @default(now()) @db.Timestamp(6)
   Coupon         Coupon[]
   hotel          Hotel?
-  user           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Permission {
@@ -285,10 +285,11 @@ model RoomAvailability {
 
 model RoomBed {
   id          Int         @id @default(autoincrement())
+  roomTypeId  Int
   roomBedType RoomBedType
   quantity    Int
   createdAt   DateTime?   @default(now()) @db.Timestamp(6)
-  RoomType    RoomType[]
+  RoomType    RoomType    @relation(fields: [roomTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model RoomBlock {
@@ -304,10 +305,9 @@ model RoomBlock {
 model RoomType {
   id              Int               @id @default(autoincrement())
   hotelId         Int
-  roomType        String            @db.VarChar(100)
+  type            String            @db.VarChar(100)
   adults          Int
   child           Int?              @default(0)
-  roomBedId       Int
   area            Int
   serviceFeeRate  Float             @db.Real
   description     String
@@ -315,10 +315,10 @@ model RoomType {
   deletedAt       DateTime?         @db.Timestamp(6)
   createdAt       DateTime?         @default(now()) @db.Timestamp(6)
   updatedAt       DateTime?         @default(now()) @db.Timestamp(6)
-  Room            Room[]
+  room            Room[]
+  roomBed         RoomBed[]
   Hotel           Hotel             @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  RoomBed         RoomBed           @relation(fields: [roomBedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  RoomTypeAmenity RoomTypeAmenity[]
+  roomTypeAmenity RoomTypeAmenity[]
 }
 
 model RoomTypeAmenity {
