@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { HotelRepo } from './hotel.repo'
 import {
-  CreateHotelAmenityBodyType,
+  CreateHotelAmenitiesBodyType,
   CreateHotelBodyType,
   GetHotelsQueryType,
   UpdateHotelAmenitiesBodyType,
@@ -59,10 +59,10 @@ export class HotelService {
     }
   }
 
-  async createAmenity(data: CreateHotelAmenityBodyType) {
+  async createAmenities(data: CreateHotelAmenitiesBodyType) {
     try {
       await this.checkHotelExist(data.hotelId)
-      return await this.hotelRepo.createAmenity({ data })
+      return await this.hotelRepo.createAmenities({ data })
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
         throw HotelAmenityAlreadyExistsException

@@ -1,3 +1,4 @@
+import { AmenitySchema } from 'src/shared/models/shared-amenity.model'
 import { HotelSchema } from 'src/shared/models/shared-hotel.model'
 import { z } from 'zod'
 
@@ -65,19 +66,19 @@ export const HotelAmenitySchema = z.object({
   amenityId: z.number(),
 })
 
-export const GetHotelAmenitiesResSchema = z.array(HotelAmenitySchema)
+export const GetHotelAmenitiesResSchema = z.array(AmenitySchema)
 
-export const CreateHotelAmenityBodySchema = HotelAmenitySchema.omit({
-  id: true,
-}).strict()
+export const CreateHotelAmenitiesBodySchema = z
+  .object({
+    amenities: z.array(z.number()),
+    hotelId: z.number(),
+  })
+  .strict()
 
-export const CreateHotelAmenityResSchema = HotelAmenitySchema
+export const CreateHotelAmenitiesResSchema = z.array(AmenitySchema)
 
-export const UpdateHotelAmenitiesBodySchema = HotelAmenitySchema.omit({
-  id: true,
-  amenityId: true,
-})
-  .extend({
+export const UpdateHotelAmenitiesBodySchema = z
+  .object({
     amenities: z.array(z.number()),
   })
   .strict()
@@ -92,8 +93,8 @@ export type GetHotelResType = z.infer<typeof GetHotelResSchema>
 export type UpdateHotelBodyType = z.infer<typeof UpdateHotelBodySchema>
 export type UpdateHotelResType = z.infer<typeof UpdateHotelResSchema>
 export type HotelAmenityType = z.infer<typeof HotelAmenitySchema>
-export type CreateHotelAmenityBodyType = z.infer<typeof CreateHotelAmenityBodySchema>
-export type CreateHotelAmenityResType = z.infer<typeof CreateHotelAmenityResSchema>
+export type CreateHotelAmenitiesBodyType = z.infer<typeof CreateHotelAmenitiesBodySchema>
+export type CreateHotelAmenitiesResType = z.infer<typeof CreateHotelAmenitiesResSchema>
 export type GetHotelAmenitiesResType = z.infer<typeof GetHotelAmenitiesResSchema>
 export type UpdateHotelAmenitiesBodyType = z.infer<typeof UpdateHotelAmenitiesBodySchema>
 export type UpdateHotelAmenitiesResType = z.infer<typeof UpdateHotelAmenitiesResSchema>

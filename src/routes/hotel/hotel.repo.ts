@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import {
-  CreateHotelAmenityBodyType,
+  CreateHotelAmenitiesBodyType,
   CreateHotelBodyType,
   GetHotelsQueryType,
   UpdateHotelAmenitiesBodyType,
@@ -101,9 +101,13 @@ export class HotelRepo {
     })
   }
 
-  async createAmenity({ data }: { data: CreateHotelAmenityBodyType }) {
-    return await this.prismaService.hotelAmenity.create({
-      data,
+  async createAmenities({ data }: { data: CreateHotelAmenitiesBodyType }) {
+    const hotelAmenities = data.amenities.map((amenityId) => ({
+      hotelId: data.hotelId,
+      amenityId,
+    }))
+    return await this.prismaService.hotelAmenity.createMany({
+      data: hotelAmenities,
     })
   }
 

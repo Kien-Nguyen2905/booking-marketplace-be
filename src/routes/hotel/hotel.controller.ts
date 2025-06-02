@@ -2,8 +2,8 @@ import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { HotelService } from './hotel.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import {
-  CreateHotelAmenityBodyDTO,
-  CreateHotelAmenityResDTO,
+  CreateHotelAmenitiesBodyDTO,
+  CreateHotelAmenitiesResDTO,
   CreateHotelBodyDTO,
   CreateHotelResDTO,
   GetHotelResDTO,
@@ -54,9 +54,9 @@ export class HotelController {
   }
 
   @Post('amenities')
-  @ZodSerializerDto(CreateHotelAmenityResDTO)
-  async createAmenity(@Body() body: CreateHotelAmenityBodyDTO) {
-    return await this.hotelService.createAmenity(body)
+  @ZodSerializerDto(CreateHotelAmenitiesResDTO)
+  async createAmenities(@Body() body: CreateHotelAmenitiesBodyDTO) {
+    return await this.hotelService.createAmenities(body)
   }
 
   @Get('amenities/:hotelId')

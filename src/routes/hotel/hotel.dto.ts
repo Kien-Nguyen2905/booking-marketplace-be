@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod'
 import {
-  CreateHotelAmenityBodySchema,
-  CreateHotelAmenityResSchema,
+  CreateHotelAmenitiesBodySchema,
+  CreateHotelAmenitiesResSchema,
   CreateHotelBodySchema,
   CreateHotelResSchema,
   GetHotelAmenitiesResSchema,
@@ -25,8 +25,8 @@ export class UpdateHotelBodyDTO extends createZodDto(UpdateHotelBodySchema) {}
 export class GetHotelsResDTO extends createZodDto(GetHotelsResSchema) {}
 export class GetHotelsQueryDTO extends createZodDto(GetHotelsQuerySchema) {}
 
-export class CreateHotelAmenityBodyDTO extends createZodDto(CreateHotelAmenityBodySchema) {}
-export class CreateHotelAmenityResDTO extends createZodDto(CreateHotelAmenityResSchema) {}
+export class CreateHotelAmenitiesBodyDTO extends createZodDto(CreateHotelAmenitiesBodySchema) {}
+export class CreateHotelAmenitiesResDTO extends createZodDto(CreateHotelAmenitiesResSchema) {}
 
 export class GetHotelAmenitiesResDTO extends createZodDto(GetHotelAmenitiesResSchema) {}
 
