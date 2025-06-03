@@ -7,6 +7,15 @@ import { PrismaService } from 'src/shared/services/prisma.service'
 export class RoomRepo {
   constructor(private prismaService: PrismaService) {}
 
+  async findRoomByRoomTypeId(roomTypeId: number) {
+    return await this.prismaService.room.findMany({
+      where: {
+        roomTypeId,
+        deletedAt: null,
+      },
+    })
+  }
+
   async findById(id: number) {
     return await this.prismaService.room.findUnique({
       where: {

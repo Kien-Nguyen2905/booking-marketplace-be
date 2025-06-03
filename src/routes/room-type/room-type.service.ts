@@ -8,13 +8,21 @@ import {
   UpdateRoomTypeAmenitiesBodyType,
   UpdateRoomTypeBodyType,
 } from 'src/routes/room-type/room-type.model'
-import { RoomTypeNotFoundException, TypeAlreadyExistsException } from './room-type.error'
+import {
+  RoomTypeAlreadyHasRoomException,
+  RoomTypeNotFoundException,
+  TypeAlreadyExistsException,
+} from './room-type.error'
 import { isForeignKeyConstraintPrismaError, isUniqueConstraintPrismaError } from 'src/shared/helpers'
 import { HotelNotFoundException } from 'src/routes/hotel/hotel.error'
+import { RoomRepo } from 'src/routes/room/room.repo'
 
 @Injectable()
 export class RoomTypeService {
-  constructor(private roomTypeRepo: RoomTypeRepo) {}
+  constructor(
+    private roomTypeRepo: RoomTypeRepo,
+    private roomRepo: RoomRepo,
+  ) {}
 
   async getRoomTypeById(roomTypeId: number) {
     return await this.roomTypeRepo.findById(roomTypeId)
@@ -57,6 +65,10 @@ export class RoomTypeService {
   }
 
   async delete(id: number) {
+    const rooms = await this.roomRepo.findRoomByRoomTypeId(id)
+    if (rooms?.length > 0) {
+      throw RoomTypeAlreadyHasRoomException
+    }
     await this.checkRoomTypeExist(id)
     return await this.roomTypeRepo.delete(id)
   }

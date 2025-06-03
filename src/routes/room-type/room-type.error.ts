@@ -2,7 +2,7 @@ import { BadRequestException, UnprocessableEntityException } from '@nestjs/commo
 
 export const RoomTypeAlreadyExistsException = new BadRequestException('Room type already exists')
 export const RoomTypeNotFoundException = new BadRequestException('Room type not found')
-
+export const RoomTypeAlreadyHasRoomException = new BadRequestException('Room type already has room')
 export const TypeAlreadyExistsException = new UnprocessableEntityException([
   {
     message: 'Type already exists',
