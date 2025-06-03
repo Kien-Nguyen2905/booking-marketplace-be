@@ -9,7 +9,7 @@ export const RoomTypeSchema = z.object({
   child: z.number().int().optional().default(0),
   area: z.number().int().positive(),
   serviceFeeRate: z.number().min(0).max(100).int(),
-  description: z.string().max(255).nonempty(),
+  description: z.string().nonempty(),
   images: z.array(z.string()).min(3),
   createdAt: z.date().nullable(),
   deletedAt: z.date().nullable(),

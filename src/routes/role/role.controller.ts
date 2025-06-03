@@ -1,13 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { ZodSerializerDto } from 'nestjs-zod'
 import {
   CreateRoleBodyDTO,
   CreateRoleResDTO,
   GetRoleDetailResDTO,
   GetRoleParamsDTO,
-  GetRolesQueryDTO,
   GetRolesResDTO,
   UpdateRoleBodyDTO,
+  UpdateRoleResDTO,
 } from 'src/routes/role/role.dto'
 import { RoleService } from 'src/routes/role/role.service'
 import { MessageResDTO } from 'src/shared/dto/response.dto'
@@ -37,7 +37,7 @@ export class RoleController {
   }
 
   @Put(':roleId')
-  @ZodSerializerDto(GetRoleDetailResDTO)
+  @ZodSerializerDto(UpdateRoleResDTO)
   update(@Body() body: UpdateRoleBodyDTO, @Param() params: GetRoleParamsDTO) {
     return this.roleService.update({
       data: body,

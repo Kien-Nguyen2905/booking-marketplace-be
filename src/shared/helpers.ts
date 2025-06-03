@@ -5,19 +5,24 @@ import path from 'path'
 // Type Predicate
 
 // Unique constraint violation
-// Error code: P2002 occurred when trying to create a record with a unique constraint violation.
+// Ý nghĩa: Lỗi P2002 xảy ra khi bạn cố gắng tạo hoặc cập nhật một bản ghi trong cơ sở dữ liệu,
+// nhưng dữ liệu vi phạm một ràng buộc duy nhất (UNIQUE) được định nghĩa trong schema của bảng.
 export function isUniqueConstraintPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
 }
 
 // Not found
-// Error code: P2025 occurred when trying to create or update a record that references a non-existent foreign key.
+// Ý nghĩa: Lỗi P2025 xảy ra khi bạn cố gắng thực hiện một thao tác (như cập nhật, xóa, hoặc truy vấn một bản ghi)
+// yêu cầu một bản ghi cụ thể tồn tại trong cơ sở dữ liệu, nhưng bản ghi đó không được tìm thấy.
+// Thông thường, lỗi này xuất hiện khi bạn sử dụng các phương thức như findUnique, update, delete, hoặc các thao tác liên quan đến quan hệ, nhưng bản ghi với điều kiện được chỉ định không tồn tại.
+
 export function isNotFoundPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'
 }
 
 // Foreign key constraint violation
-// Error code: P2003 occurred when trying to create or update a record that references a non-existent foreign key.
+// Ý nghĩa: Lỗi P2003 xảy ra khi bạn cố gắng thực hiện một thao tác (như tạo hoặc cập nhật bản ghi)
+// liên quan đến một trường khóa ngoại, nhưng giá trị của trường đó không hợp lệ hoặc không tồn tại trong bảng liên quan.
 export function isForeignKeyConstraintPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003'
 }

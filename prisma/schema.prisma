@@ -100,7 +100,7 @@ model HotelAmenity {
   amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   hotel     Hotel   @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([hotelId, amenityId])
+  @@index([hotelId, amenityId])
 }
 
 model Notify {
@@ -172,9 +172,9 @@ model Partner {
   createdById    Int?
   createdAt      DateTime?      @default(now()) @db.Timestamp(6)
   updatedAt      DateTime?      @default(now()) @db.Timestamp(6)
-  Coupon         Coupon[]
+  coupon         Coupon[]
   hotel          Hotel?
-  User           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Permission {
@@ -268,11 +268,11 @@ model Room {
   deletedAt        DateTime?          @db.Timestamp(6)
   createdAt        DateTime?          @default(now()) @db.Timestamp(6)
   updatedAt        DateTime?          @default(now()) @db.Timestamp(6)
-  Order            Order[]
-  Hotel            Hotel              @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  RoomType         RoomType           @relation(fields: [roomTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  RoomAvailability RoomAvailability[]
-  RoomBlock        RoomBlock[]
+  order            Order[]
+  hotel            Hotel              @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roomType         RoomType           @relation(fields: [roomTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roomAvailability RoomAvailability[]
+  roomBlock        RoomBlock[]
 }
 
 model RoomAvailability {
@@ -280,7 +280,7 @@ model RoomAvailability {
   roomId         Int
   availableRooms Int
   createdAt      DateTime? @default(now()) @db.Timestamp(6)
-  Room           Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  room           Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model RoomBed {
@@ -317,7 +317,7 @@ model RoomType {
   updatedAt       DateTime?         @default(now()) @db.Timestamp(6)
   room            Room[]
   roomBed         RoomBed[]
-  Hotel           Hotel             @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotel           Hotel             @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   roomTypeAmenity RoomTypeAmenity[]
 }
 

@@ -32,16 +32,19 @@ export class RoomTypeRepo {
         },
       },
     })
-
-    const amenities = roomType?.roomTypeAmenity.map((roomTypeAmenity) => roomTypeAmenity.amenity) || []
+    if (!roomType) {
+      return null
+    }
+    const amenities = roomType.roomTypeAmenity.map((roomTypeAmenity) => roomTypeAmenity.amenity)
     return {
       ...roomType,
-      roomTypeAmenity: amenities,
+      amenities,
+      roomTypeAmenity: undefined,
     }
   }
 
   async findByHotelId(hotelId: number) {
-    return await this.prismaService.roomType.findMany({
+    const roomTypes = await this.prismaService.roomType.findMany({
       where: {
         hotelId,
         deletedAt: null,
@@ -49,7 +52,25 @@ export class RoomTypeRepo {
       orderBy: {
         createdAt: 'desc',
       },
+      include: {
+        roomBed: true,
+        roomTypeAmenity: {
+          include: {
+            amenity: true,
+          },
+        },
+        room: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
     })
+    return roomTypes.map((roomType) => ({
+      ...roomType,
+      amenities: roomType.roomTypeAmenity.map((item) => item.amenity),
+      roomTypeAmenity: undefined,
+    }))
   }
 
   async create(data: CreateRoomTypeBodyType) {

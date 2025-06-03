@@ -1,13 +1,20 @@
 import { AmenitySchema } from 'src/shared/models/shared-amenity.model'
 import { RoomBedSchema, RoomTypeSchema } from 'src/shared/models/shared-room-type'
+import { RoomSchema } from 'src/shared/models/shared-room.model'
 import { z } from 'zod'
 
 export const GetRoomTypeByIdResSchema = RoomTypeSchema.extend({
   roomBed: z.array(RoomBedSchema),
-  roomTypeAmenity: z.array(AmenitySchema),
-}).strict()
+  amenities: z.array(AmenitySchema),
+})
 
-export const GetRoomTypeByHotelIdResSchema = z.array(RoomTypeSchema)
+export const GetRoomTypeByHotelIdResSchema = z.array(
+  RoomTypeSchema.extend({
+    roomBed: z.array(RoomBedSchema),
+    amenities: z.array(AmenitySchema),
+    room: z.array(RoomSchema),
+  }),
+)
 
 export const CreateRoomTypeBodySchema = RoomTypeSchema.omit({
   id: true,

@@ -20,6 +20,7 @@ import { PartnerModule } from './routes/partner/partner.module'
 import { HotelModule } from './routes/hotel/hotel.module'
 import { AmenityModule } from './routes/amenity/amenity.module'
 import { RoomTypeModule } from './routes/room-type/room-type.module'
+import { RoomModule } from './routes/room/room.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -39,6 +40,7 @@ import { RoomTypeModule } from './routes/room-type/room-type.module'
     HotelModule,
     AmenityModule,
     RoomTypeModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [

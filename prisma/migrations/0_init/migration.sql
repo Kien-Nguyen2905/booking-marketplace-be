@@ -344,7 +344,7 @@ CREATE TABLE "RoomBlock" (
 CREATE TABLE "RoomType" (
     "id" SERIAL NOT NULL,
     "hotelId" INTEGER NOT NULL,
-    "roomType" VARCHAR(100) NOT NULL,
+    "type" VARCHAR(100) NOT NULL,
     "adults" INTEGER NOT NULL,
     "child" INTEGER DEFAULT 0,
     "area" INTEGER NOT NULL,
