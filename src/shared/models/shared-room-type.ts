@@ -6,7 +6,7 @@ export const RoomTypeSchema = z.object({
   hotelId: z.number().int().positive(),
   type: z.string().max(100).nonempty(),
   adults: z.number().int().positive(),
-  child: z.number().int().optional().default(0),
+  child: z.number().int().positive().optional().default(0),
   area: z.number().int().positive(),
   serviceFeeRate: z.number().min(0).max(100).int(),
   description: z.string().nonempty(),

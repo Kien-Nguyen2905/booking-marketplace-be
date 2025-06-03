@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { CreateRoomBodyType } from 'src/routes/room/room.model'
-import { PolicyType } from 'src/shared/constants/room.constant'
+import { POLICY_TYPE, PolicyType } from 'src/shared/constants/room.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
 @Injectable()
@@ -64,6 +64,7 @@ export class RoomRepo {
       },
       data: {
         ...data,
+        rangeLimitDate: data.policy === POLICY_TYPE.FREE_CANCELLATION ? data.rangeLimitDate : 0,
         policy: data.policy as PolicyType,
         updatedAt: new Date(),
       },
