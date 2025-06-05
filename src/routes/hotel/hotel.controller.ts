@@ -6,15 +6,21 @@ import {
   CreateHotelAmenitiesResDTO,
   CreateHotelBodyDTO,
   CreateHotelResDTO,
+  GetFindHotelsQueryDTO,
+  GetFindHotelsResDTO,
   GetHotelResDTO,
+  GetHotelsByProvinceCodeResDTO,
   GetHotelsQueryDTO,
   GetHotelsResDTO,
+  GetQuantityHotelsByProvinceCodeBodyDTO,
+  GetQuantityHotelsByProvinceCodeResDTO,
   UpdateHotelAmenitiesBodyDTO,
   UpdateHotelAmenitiesResDTO,
   UpdateHotelBodyDTO,
   UpdateHotelResDTO,
 } from 'src/routes/hotel/hotel.dto'
 import { GetAmenitiesResDTO } from 'src/routes/amenity/amenity.dto'
+import { IsPublic } from 'src/shared/decorators/auth.decorator'
 
 @Controller('hotels')
 export class HotelController {
@@ -24,6 +30,13 @@ export class HotelController {
   @ZodSerializerDto(GetHotelsResDTO)
   async list(@Query() query: GetHotelsQueryDTO) {
     return await this.hotelService.list(query)
+  }
+
+  @Get('find-hotels')
+  @IsPublic()
+  @ZodSerializerDto(GetFindHotelsResDTO)
+  async findHotels(@Query() query: GetFindHotelsQueryDTO) {
+    return await this.hotelService.findHotels(query)
   }
 
   @Post()
@@ -69,5 +82,19 @@ export class HotelController {
   @ZodSerializerDto(UpdateHotelAmenitiesResDTO)
   async updateAmenities(@Body() body: UpdateHotelAmenitiesBodyDTO, @Param('hotelId') hotelId: string) {
     return await this.hotelService.updateAmenities({ data: body, hotelId: +hotelId })
+  }
+
+  @Post('province/count')
+  @ZodSerializerDto(GetQuantityHotelsByProvinceCodeResDTO)
+  @IsPublic()
+  async countHotel(@Body() body: GetQuantityHotelsByProvinceCodeBodyDTO) {
+    return await this.hotelService.countHotel(body.provinceCodes)
+  }
+
+  @Get('province/:provinceCode')
+  @ZodSerializerDto(GetHotelsByProvinceCodeResDTO)
+  @IsPublic()
+  async getHotelsByProvinceCode(@Param('provinceCode') provinceCode: string) {
+    return await this.hotelService.getHotelsByProvinceCode(+provinceCode)
   }
 }

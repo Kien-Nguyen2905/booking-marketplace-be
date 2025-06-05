@@ -4,10 +4,15 @@ import {
   CreateHotelAmenitiesResSchema,
   CreateHotelBodySchema,
   CreateHotelResSchema,
+  GetFindHotelsQuerySchema,
+  GetFindHotelsResSchema,
   GetHotelAmenitiesResSchema,
   GetHotelResSchema,
+  GetHotelsByProvinceCodeResSchema,
   GetHotelsQuerySchema,
   GetHotelsResSchema,
+  GetQuantityHotelsByProvinceCodeBodySchema,
+  GetQuantityHotelsByProvinceCodeResSchema,
   UpdateHotelAmenitiesBodySchema,
   UpdateHotelAmenitiesResSchema,
   UpdateHotelBodySchema,
@@ -32,3 +37,11 @@ export class GetHotelAmenitiesResDTO extends createZodDto(GetHotelAmenitiesResSc
 
 export class UpdateHotelAmenitiesBodyDTO extends createZodDto(UpdateHotelAmenitiesBodySchema) {}
 export class UpdateHotelAmenitiesResDTO extends createZodDto(UpdateHotelAmenitiesResSchema) {}
+
+export class GetHotelsByProvinceCodeResDTO extends createZodDto(GetHotelsByProvinceCodeResSchema) {}
+
+export class GetQuantityHotelsByProvinceCodeBodyDTO extends createZodDto(GetQuantityHotelsByProvinceCodeBodySchema) {}
+export class GetQuantityHotelsByProvinceCodeResDTO extends createZodDto(GetQuantityHotelsByProvinceCodeResSchema) {}
+
+export class GetFindHotelsQueryDTO extends createZodDto(GetFindHotelsQuerySchema) {}
+export class GetFindHotelsResDTO extends createZodDto(GetFindHotelsResSchema) {}

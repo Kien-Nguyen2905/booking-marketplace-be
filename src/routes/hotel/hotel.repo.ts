@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { eachDayOfInterval, isValid, parse } from 'date-fns'
 import {
   CreateHotelAmenitiesBodyType,
   CreateHotelBodyType,
@@ -6,6 +7,7 @@ import {
   UpdateHotelAmenitiesBodyType,
   UpdateHotelBodyType,
 } from 'src/routes/hotel/hotel.model'
+import { AMENITY_CATEGORY_TYPE } from 'src/shared/constants/amenity.constant'
 import { HotelStatusType } from 'src/shared/constants/hotel.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { S3Service } from 'src/shared/services/s3.service'
@@ -145,5 +147,261 @@ export class HotelRepo {
         include: { amenity: true },
       })
     })
+  }
+
+  async findHotelsByProvinceCode(provinceCode: number) {
+    return await this.prismaService.hotel.findMany({
+      where: {
+        provinceCode,
+        status: 'ACTIVE',
+        roomType: {
+          some: {
+            deletedAt: null, // Chỉ lấy roomType chưa bị xóa
+            room: {
+              some: {
+                deletedAt: null, // Chỉ lấy room chưa bị xóa
+              },
+            },
+          },
+        },
+      },
+      include: {
+        roomType: {
+          where: {
+            deletedAt: null, // Chỉ bao gồm roomType chưa bị xóa
+          },
+          include: {
+            room: {
+              where: {
+                deletedAt: null, // Chỉ bao gồm room chưa bị xóa
+              },
+              orderBy: {
+                price: 'asc',
+              },
+            },
+            roomBed: true,
+            roomTypeAmenity: {
+              select: {
+                amenity: true,
+              },
+            },
+          },
+        },
+      },
+      take: 8,
+      orderBy: {
+        rating: 'desc',
+      },
+    })
+  }
+
+  async countHotel(provinceCodes: number[]) {
+    // Kiểm tra đầu vào
+    if (!provinceCodes || provinceCodes.length === 0) {
+      return []
+    }
+
+    // Truy vấn đếm khách sạn cho từng provinceCode
+    const results = await this.prismaService.hotel.groupBy({
+      by: ['provinceCode'],
+      where: {
+        provinceCode: {
+          in: provinceCodes,
+        },
+        status: 'ACTIVE',
+        roomType: {
+          some: {
+            deletedAt: null,
+            room: {
+              some: {
+                deletedAt: null,
+              },
+            },
+          },
+        },
+      },
+      _count: {
+        id: true,
+      },
+    })
+
+    // Định dạng kết quả thành mảng
+    const countArray = provinceCodes.map((code) => ({
+      provinceCode: code,
+      quantity: results.find((result) => result.provinceCode === code)?._count.id || 0,
+    }))
+
+    return countArray
+  }
+
+  async findHotels(query: {
+    province: number
+    start: string // DD-MM-YYYY
+    end: string // DD-MM-YYYY
+    adult: number
+    child?: number
+    available: number
+    page: number
+    limit: number
+    orderBy?: string // 'rating', 'reputationScore', 'price'
+    order?: 'asc' | 'desc' // Thứ tự sắp xếp
+  }): Promise<{
+    data: any[]
+    totalItems: number
+    page: number
+    limit: number
+    totalPages: number
+  }> {
+    const {
+      province,
+      start,
+      end,
+      adult,
+      child = 0,
+      available,
+      page,
+      limit,
+      orderBy = 'reputationScore',
+      order = 'desc',
+    } = query
+    // Tính skip và take cho phân trang
+    const skip = (page - 1) * limit
+    const take = limit
+
+    // Chuyển đổi ngày từ DD-MM-YYYY sang Date
+    const startDate = parse(start, 'dd-MM-yyyy', new Date())
+    const endDate = parse(end, 'dd-MM-yyyy', new Date())
+
+    if (!isValid(startDate) || !isValid(endDate) || startDate >= endDate) {
+      throw new Error('Invalid date range')
+    }
+
+    // Lấy tất cả các ngày trong khoảng thời gian
+    const dateRange = eachDayOfInterval({ start: startDate, end: endDate })
+
+    // Kiểm tra tính hợp lệ của orderBy
+    const validOrderByFields = ['rating', 'reputationScore', 'createdAt', 'price']
+    const finalOrderBy = validOrderByFields.includes(orderBy) ? orderBy : 'reputationScore'
+
+    // Truy vấn khách sạn (bỏ skip và take để lấy toàn bộ)
+    const hotels = await this.prismaService.hotel.findMany({
+      where: {
+        provinceCode: province,
+        status: 'ACTIVE',
+        roomType: {
+          some: {
+            deletedAt: null,
+            adults: { gte: adult },
+            child: child === 0 ? undefined : { gte: child },
+            room: {
+              some: {
+                deletedAt: null,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        roomType: {
+          where: {
+            deletedAt: null,
+            adults: { gte: adult },
+            child: child === 0 ? undefined : { gte: child },
+          },
+          include: {
+            room: {
+              where: {
+                deletedAt: null,
+              },
+              orderBy: {
+                price: 'asc',
+              },
+              include: {
+                roomAvailability: {
+                  where: {
+                    createdAt: {
+                      gte: startDate,
+                      lte: endDate,
+                    },
+                  },
+                },
+              },
+            },
+            roomBed: true,
+          },
+        },
+      },
+      orderBy: finalOrderBy !== 'price' ? { [finalOrderBy]: order } : undefined,
+    })
+
+    // Hàm kiểm tra phòng trống
+    const isRoomAvailable = (room: any, dateRange: Date[], available: number): boolean => {
+      for (const date of dateRange) {
+        const availability = room.roomAvailability.find(
+          (avail: any) => avail?.createdAt?.toDateString() === date.toDateString(),
+        )
+        const availableRooms = availability ? availability.availableRooms : room.quantity
+        if (availableRooms < available) {
+          return false
+        }
+      }
+      return true
+    }
+
+    // Hàm lọc các roomType
+    const filterRoomTypes = (roomType: any, dateRange: Date[], available: number): any | null => {
+      // Sử dụng find để lấy phòng đầu tiên thỏa mãn
+      const firstAvailableRoom = roomType.room.find((room: any) => isRoomAvailable(room, dateRange, available))
+      if (!firstAvailableRoom) return null
+      return {
+        ...roomType,
+        room: [firstAvailableRoom], // Chỉ giữ phòng đầu tiên thỏa mãn
+      }
+    }
+
+    // Hàm lọc các khách sạn
+    const filterHotels = (hotel: any, dateRange: Date[], available: number): any | null => {
+      const filteredRoomTypes = hotel.roomType
+        .map((roomType: any) => filterRoomTypes(roomType, dateRange, available))
+        .filter((roomType: any) => roomType !== null)
+      if (filteredRoomTypes.length === 0) return null
+      return {
+        ...hotel,
+        roomType: filteredRoomTypes,
+      }
+    }
+
+    // Lọc khách sạn dựa trên số phòng trống
+    let filteredHotels = hotels
+      .map((hotel) => filterHotels(hotel, dateRange, available))
+      .filter((hotel) => hotel !== null)
+
+    // Nếu orderBy là 'price', sắp xếp khách sạn theo giá phòng đầu tiên
+    if (finalOrderBy === 'price') {
+      const filteredHotelsPrice = filteredHotels.map((hotel) => {
+        const price = hotel.roomType.sort((a, b) => a.room[0].price - b.room[0].price)[0]?.room[0]?.price ?? Infinity
+        return {
+          ...hotel,
+          price,
+        }
+      })
+      filteredHotels = filteredHotelsPrice.sort((a, b) => {
+        return order === 'asc' ? a.price - b.price : b.price - a.price
+      })
+    }
+
+    // Tính totalItems và totalPages
+    const totalItems = filteredHotels.length
+    const totalPages = Math.ceil(totalItems / limit)
+    // Áp dụng phân trang
+    const paginatedHotels = filteredHotels.slice(skip, skip + take)
+
+    return {
+      data: paginatedHotels,
+      totalItems,
+      page,
+      limit,
+      totalPages,
+    }
   }
 }

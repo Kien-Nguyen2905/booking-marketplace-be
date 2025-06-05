@@ -80,4 +80,25 @@ export class HotelService {
     await this.checkHotelExist(hotelId)
     return await this.hotelRepo.updateAmenities({ data, hotelId })
   }
+
+  async getHotelsByProvinceCode(provinceCode: number) {
+    return await this.hotelRepo.findHotelsByProvinceCode(provinceCode)
+  }
+
+  async countHotel(provinceCodes: number[]) {
+    return await this.hotelRepo.countHotel(provinceCodes)
+  }
+
+  async findHotels(query: {
+    province: number
+    start: string // DD-MM-YYYY
+    end: string // DD-MM-YYYY
+    adult: number
+    child?: number
+    available: number
+    page: number
+    limit: number
+  }) {
+    return await this.hotelRepo.findHotels(query)
+  }
 }

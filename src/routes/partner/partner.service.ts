@@ -37,11 +37,11 @@ export class PartnerService {
 
   async create({ data, userId }: { data: CreatePartnerBodyType; userId: number }) {
     try {
-      await this.authService.validateVerificationCode({
-        email: data.email,
-        code: data.code,
-        type: TypeOfVerificationCode.VERIFY,
-      })
+      // await this.authService.validateVerificationCode({
+      //   email: data.email,
+      //   code: data.code,
+      //   type: TypeOfVerificationCode.VERIFY,
+      // })
       const adminRoleId = await this.authRepository.findUniqueUserIncludeRole({
         email: data.email,
       })
@@ -52,13 +52,13 @@ export class PartnerService {
 
       const [partner] = await Promise.all([
         this.partnerRepo.create({ data: partnerData, userId }),
-        this.authRepository.deleteVerificationCode({
-          email_type: {
-            email: data.email,
-            type: TypeOfVerificationCode.VERIFY,
-          },
-          code: data.code,
-        }),
+        // this.authRepository.deleteVerificationCode({
+        //   email_type: {
+        //     email: data.email,
+        //     type: TypeOfVerificationCode.VERIFY,
+        //   },
+        //   code: data.code,
+        // }),
       ])
       return partner
     } catch (error) {

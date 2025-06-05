@@ -1,5 +1,7 @@
 import { AmenitySchema } from 'src/shared/models/shared-amenity.model'
 import { HotelSchema } from 'src/shared/models/shared-hotel.model'
+import { RoomBedSchema, RoomTypeSchema } from 'src/shared/models/shared-room-type'
+import { RoomSchema } from 'src/shared/models/shared-room.model'
 import { z } from 'zod'
 
 export const GetHotelsResSchema = z.object({
@@ -22,6 +24,37 @@ export const GetHotelsQuerySchema = z
     status: z.string().optional(),
   })
   .strict()
+
+export const GetFindHotelsQuerySchema = z
+  .object({
+    province: z.coerce.number().int().positive(),
+    start: z.string(),
+    end: z.string(),
+    adult: z.coerce.number().int().positive(),
+    child: z.coerce.number().int().min(0).optional(),
+    available: z.coerce.number().int().positive(),
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().default(8),
+    orderBy: z.string().optional().default('reputationScore'),
+    order: z.enum(['asc', 'desc']).optional().default('desc'),
+  })
+  .strict()
+
+export const GetFindHotelsResSchema = z.object({
+  data: z.array(
+    HotelSchema.extend({
+      roomType: z.array(
+        RoomTypeSchema.extend({
+          room: z.array(RoomSchema),
+        }),
+      ),
+    }),
+  ),
+  totalItems: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+})
 
 export const CreateHotelBodySchema = HotelSchema.omit({
   id: true,
@@ -85,6 +118,32 @@ export const UpdateHotelAmenitiesBodySchema = z
 
 export const UpdateHotelAmenitiesResSchema = GetHotelAmenitiesResSchema
 
+export const GetHotelsByProvinceCodeResSchema = z.array(
+  HotelSchema.extend({
+    roomType: z.array(
+      RoomTypeSchema.extend({
+        room: z.array(RoomSchema),
+        roomBed: z.array(RoomBedSchema),
+        roomTypeAmenity: z.array(
+          z.object({
+            amenity: AmenitySchema,
+          }),
+        ),
+      }),
+    ),
+  }),
+)
+
+export const GetQuantityHotelsByProvinceCodeBodySchema = z.object({
+  provinceCodes: z.array(z.number()),
+})
+export const GetQuantityHotelsByProvinceCodeResSchema = z.array(
+  z.object({
+    provinceCode: z.number(),
+    quantity: z.number(),
+  }),
+)
+
 export type GetHotelsQueryType = z.infer<typeof GetHotelsQuerySchema>
 export type GetHotelsResType = z.infer<typeof GetHotelsResSchema>
 export type CreateHotelBodyType = z.infer<typeof CreateHotelBodySchema>
@@ -98,3 +157,8 @@ export type CreateHotelAmenitiesResType = z.infer<typeof CreateHotelAmenitiesRes
 export type GetHotelAmenitiesResType = z.infer<typeof GetHotelAmenitiesResSchema>
 export type UpdateHotelAmenitiesBodyType = z.infer<typeof UpdateHotelAmenitiesBodySchema>
 export type UpdateHotelAmenitiesResType = z.infer<typeof UpdateHotelAmenitiesResSchema>
+export type GetHotelsByProvinceCodeResType = z.infer<typeof GetHotelsByProvinceCodeResSchema>
+export type GetQuantityHotelsByProvinceCodeBodyType = z.infer<typeof GetQuantityHotelsByProvinceCodeBodySchema>
+export type GetQuantityHotelsByProvinceCodeResType = z.infer<typeof GetQuantityHotelsByProvinceCodeResSchema>
+export type GetFindHotelsQueryType = z.infer<typeof GetFindHotelsQuerySchema>
+export type GetFindHotelsResType = z.infer<typeof GetFindHotelsResSchema>

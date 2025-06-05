@@ -84,13 +84,13 @@ model Hotel {
   status           HotelStatus?   @default(PENDING)
   createdAt        DateTime?      @default(now()) @db.Timestamp(6)
   updatedAt        DateTime?      @default(now()) @db.Timestamp(6)
-  Partner          Partner        @relation(fields: [partnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  HotelAmenity     HotelAmenity[]
-  Order            Order[]
-  Review           Review[]
-  Room             Room[]
-  RoomType         RoomType[]
-  Wishlist         Wishlist[]
+  partner          Partner        @relation(fields: [partnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotelAmenity     HotelAmenity[]
+  order            Order[]
+  review           Review[]
+  room             Room[]
+  roomType         RoomType[]
+  wishlist         Wishlist[]
 }
 
 model HotelAmenity {
@@ -279,7 +279,7 @@ model RoomAvailability {
   id             Int       @id @default(autoincrement())
   roomId         Int
   availableRooms Int
-  createdAt      DateTime? @default(now()) @db.Timestamp(6)
+  createdAt      DateTime? @default(now()) @db.Date
   room           Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
