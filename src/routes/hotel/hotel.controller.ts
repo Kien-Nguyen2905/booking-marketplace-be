@@ -46,6 +46,7 @@ export class HotelController {
   }
 
   @Get(':id')
+  @IsPublic()
   @ZodSerializerDto(GetHotelResDTO)
   async find(@Param('id') id: string) {
     return await this.hotelService.find(+id)

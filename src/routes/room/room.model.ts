@@ -25,6 +25,14 @@ export const UpdateRoomResSchema = RoomSchema
 
 export const DeleteRoomResSchema = RoomSchema
 
+export const GetAvailableRoomsByRoomIdQuerySchema = z.object({
+  start: z.string(),
+  end: z.string(),
+})
+export const GetAvailableRoomsByRoomIdResSchema = RoomSchema.extend({
+  availableRooms: z.number(),
+})
+
 export type GetRoomByIdResType = z.infer<typeof GetRoomByIdResSchema>
 
 export type GetRoomsByHotelIdResType = z.infer<typeof GetRoomsByHotelIdResSchema>
@@ -36,3 +44,6 @@ export type UpdateRoomBodyType = z.infer<typeof UpdateRoomBodySchema>
 export type UpdateRoomResType = z.infer<typeof UpdateRoomResSchema>
 
 export type DeleteRoomResType = z.infer<typeof DeleteRoomResSchema>
+
+export type GetAvailableRoomsByRoomIdQueryType = z.infer<typeof GetAvailableRoomsByRoomIdQuerySchema>
+export type GetAvailableRoomsByRoomIdResType = z.infer<typeof GetAvailableRoomsByRoomIdResSchema>

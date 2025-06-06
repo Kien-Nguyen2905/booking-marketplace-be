@@ -1,15 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { RoomService } from './room.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import {
   CreateRoomBodyDTO,
   CreateRoomResDTO,
   DeleteRoomResDTO,
+  GetAvailableRoomsByRoomIdQueryDTO,
+  GetAvailableRoomsByRoomIdResDTO,
   GetRoomByIdResDTO,
   GetRoomsByHotelIdResDTO,
   UpdateRoomBodyDTO,
   UpdateRoomResDTO,
 } from 'src/routes/room/room.dto'
+import { IsPublic } from 'src/shared/decorators/auth.decorator'
 
 @Controller('rooms')
 export class RoomController {
@@ -43,5 +46,12 @@ export class RoomController {
   @ZodSerializerDto(DeleteRoomResDTO)
   async delete(@Param('id') id: string) {
     return await this.roomService.delete(+id)
+  }
+
+  @Get('available/:roomId')
+  @IsPublic()
+  @ZodSerializerDto(GetAvailableRoomsByRoomIdResDTO)
+  async findAvailableRoomsByRoomId(@Param('roomId') roomId: string, @Query() query: GetAvailableRoomsByRoomIdQueryDTO) {
+    return await this.roomService.findAvailableRoomsByRoomId(+roomId, query.start, query.end)
   }
 }

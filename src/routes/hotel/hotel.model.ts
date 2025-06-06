@@ -37,12 +37,15 @@ export const GetFindHotelsQuerySchema = z
     limit: z.coerce.number().int().positive().default(8),
     orderBy: z.string().optional().default('reputationScore'),
     order: z.enum(['asc', 'desc']).optional().default('desc'),
+    type: z.string().optional(),
+    rating: z.coerce.number().int().optional(),
+    amenity: z.string().optional(),
   })
   .strict()
-
 export const GetFindHotelsResSchema = z.object({
   data: z.array(
     HotelSchema.extend({
+      hotelAmenity: z.array(z.object({ amenity: AmenitySchema })),
       roomType: z.array(
         RoomTypeSchema.extend({
           room: z.array(RoomSchema),
@@ -123,12 +126,6 @@ export const GetHotelsByProvinceCodeResSchema = z.array(
     roomType: z.array(
       RoomTypeSchema.extend({
         room: z.array(RoomSchema),
-        roomBed: z.array(RoomBedSchema),
-        roomTypeAmenity: z.array(
-          z.object({
-            amenity: AmenitySchema,
-          }),
-        ),
       }),
     ),
   }),

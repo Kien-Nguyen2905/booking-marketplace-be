@@ -3,6 +3,8 @@ import {
   CreateRoomBodySchema,
   CreateRoomResSchema,
   DeleteRoomResSchema,
+  GetAvailableRoomsByRoomIdQuerySchema,
+  GetAvailableRoomsByRoomIdResSchema,
   GetRoomByIdResSchema,
   GetRoomsByHotelIdResSchema,
   UpdateRoomBodySchema,
@@ -19,3 +21,6 @@ export class UpdateRoomBodyDTO extends createZodDto(UpdateRoomBodySchema) {}
 export class UpdateRoomResDTO extends createZodDto(UpdateRoomResSchema) {}
 
 export class DeleteRoomResDTO extends createZodDto(DeleteRoomResSchema) {}
+
+export class GetAvailableRoomsByRoomIdQueryDTO extends createZodDto(GetAvailableRoomsByRoomIdQuerySchema) {}
+export class GetAvailableRoomsByRoomIdResDTO extends createZodDto(GetAvailableRoomsByRoomIdResSchema) {}

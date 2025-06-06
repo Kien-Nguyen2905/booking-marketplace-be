@@ -48,4 +48,8 @@ export class RoomService {
       throw error
     }
   }
+
+  async findAvailableRoomsByRoomId(roomId: number, start: string, end: string) {
+    return await this.roomRepo.findAvailableRoomsByRoomId(roomId, start, end)
+  }
 }

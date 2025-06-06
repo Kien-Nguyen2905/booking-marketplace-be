@@ -7,8 +7,7 @@ import {
   UpdateHotelAmenitiesBodyType,
   UpdateHotelBodyType,
 } from 'src/routes/hotel/hotel.model'
-import { AMENITY_CATEGORY_TYPE } from 'src/shared/constants/amenity.constant'
-import { HotelStatusType } from 'src/shared/constants/hotel.constant'
+import { HotelStatusType, HotelTypeType } from 'src/shared/constants/hotel.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { S3Service } from 'src/shared/services/s3.service'
 
@@ -66,7 +65,52 @@ export class HotelRepo {
   }
 
   async find(id: number) {
-    return await this.prismaService.hotel.findUnique({ where: { id } })
+    return await this.prismaService.hotel.findUnique({
+      where: {
+        id,
+        roomType: {
+          some: {
+            deletedAt: null,
+            room: {
+              some: {
+                deletedAt: null,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        hotelAmenity: {
+          select: {
+            amenity: true,
+          },
+        },
+        roomType: {
+          select: {
+            id: true,
+            hotelId: true,
+            adults: true,
+            child: true,
+            images: true,
+            area: true,
+            description: true,
+            serviceFeeRate: true,
+            type: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            room: true,
+            roomBed: true,
+            roomTypeAmenity: {
+              select: {
+                amenity: true,
+              },
+            },
+          },
+        },
+        review: true,
+      },
+    })
   }
 
   async findByPartnerId(partnerId: number) {
@@ -179,18 +223,12 @@ export class HotelRepo {
                 price: 'asc',
               },
             },
-            roomBed: true,
-            roomTypeAmenity: {
-              select: {
-                amenity: true,
-              },
-            },
           },
         },
       },
-      take: 8,
+      take: 7,
       orderBy: {
-        rating: 'desc',
+        reputationScore: 'desc',
       },
     })
   }
@@ -243,6 +281,9 @@ export class HotelRepo {
     available: number
     page: number
     limit: number
+    rating?: number
+    type?: string
+    amenity?: string // Ví dụ: '1' hoặc '1,2,3'
     orderBy?: string // 'rating', 'reputationScore', 'price'
     order?: 'asc' | 'desc' // Thứ tự sắp xếp
   }): Promise<{
@@ -261,6 +302,9 @@ export class HotelRepo {
       available,
       page,
       limit,
+      rating,
+      type,
+      amenity,
       orderBy = 'reputationScore',
       order = 'desc',
     } = query
@@ -282,12 +326,29 @@ export class HotelRepo {
     // Kiểm tra tính hợp lệ của orderBy
     const validOrderByFields = ['rating', 'reputationScore', 'createdAt', 'price']
     const finalOrderBy = validOrderByFields.includes(orderBy) ? orderBy : 'reputationScore'
+    const amenityArray = amenity
+      ? amenity
+          .split(',')
+          .map(Number)
+          .filter((n) => !isNaN(n))
+      : []
 
     // Truy vấn khách sạn (bỏ skip và take để lấy toàn bộ)
     const hotels = await this.prismaService.hotel.findMany({
       where: {
         provinceCode: province,
         status: 'ACTIVE',
+        ...(rating ? { rating: { equals: Number(rating) } } : {}),
+        ...(type ? { type: type.toUpperCase() as HotelTypeType } : {}),
+        ...(amenityArray.length > 0
+          ? {
+              hotelAmenity: {
+                some: {
+                  amenityId: { in: amenityArray },
+                },
+              },
+            }
+          : {}),
         roomType: {
           some: {
             deletedAt: null,
@@ -302,6 +363,11 @@ export class HotelRepo {
         },
       },
       include: {
+        hotelAmenity: {
+          select: {
+            amenity: true,
+          },
+        },
         roomType: {
           where: {
             deletedAt: null,
@@ -333,7 +399,6 @@ export class HotelRepo {
       },
       orderBy: finalOrderBy !== 'price' ? { [finalOrderBy]: order } : undefined,
     })
-
     // Hàm kiểm tra phòng trống
     const isRoomAvailable = (room: any, dateRange: Date[], available: number): boolean => {
       for (const date of dateRange) {
@@ -375,6 +440,16 @@ export class HotelRepo {
     let filteredHotels = hotels
       .map((hotel) => filterHotels(hotel, dateRange, available))
       .filter((hotel) => hotel !== null)
+
+    // Post-processing: Filter hotels that have all required amenities
+    if (amenityArray.length > 0) {
+      filteredHotels = filteredHotels.filter((hotel) => {
+        // Get all amenity IDs for this hotel
+        const hotelAmenityIds = hotel.hotelAmenity.map((item) => item.amenity.id)
+        // Check if all required amenities are present
+        return amenityArray.every((amenityId) => hotelAmenityIds.includes(Number(amenityId)))
+      })
+    }
 
     // Nếu orderBy là 'price', sắp xếp khách sạn theo giá phòng đầu tiên
     if (finalOrderBy === 'price') {
