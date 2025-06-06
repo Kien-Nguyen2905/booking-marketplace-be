@@ -21,6 +21,7 @@ import { HotelModule } from './routes/hotel/hotel.module'
 import { AmenityModule } from './routes/amenity/amenity.module'
 import { RoomTypeModule } from './routes/room-type/room-type.module'
 import { RoomModule } from './routes/room/room.module';
+import { WishlistModule } from './routes/wishlist/wishlist.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -41,6 +42,7 @@ import { RoomModule } from './routes/room/room.module';
     AmenityModule,
     RoomTypeModule,
     RoomModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [

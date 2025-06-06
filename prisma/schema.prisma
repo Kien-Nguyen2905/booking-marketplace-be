@@ -401,8 +401,10 @@ model Wishlist {
   id      Int   @id @default(autoincrement())
   userId  Int
   hotelId Int
-  Hotel   Hotel @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User    User  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotel   Hotel @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user    User  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([userId, hotelId])
 }
 
 enum CategoryType {
