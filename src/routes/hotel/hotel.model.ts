@@ -51,6 +51,7 @@ export const GetFindHotelsResSchema = z.object({
           room: z.array(RoomSchema),
         }),
       ),
+      price: z.number(),
     }),
   ),
   totalItems: z.number(),

@@ -65,7 +65,7 @@ export class HotelRepo {
   }
 
   async find(id: number) {
-    return await this.prismaService.hotel.findUnique({
+    const hotel = await this.prismaService.hotel.findUnique({
       where: {
         id,
         roomType: {
@@ -99,7 +99,11 @@ export class HotelRepo {
             createdAt: true,
             updatedAt: true,
             deletedAt: true,
-            room: true,
+            room: {
+              orderBy: {
+                price: 'asc',
+              },
+            },
             roomBed: true,
             roomTypeAmenity: {
               select: {
@@ -111,6 +115,12 @@ export class HotelRepo {
         review: true,
       },
     })
+    hotel?.roomType?.sort((a, b) => {
+      const priceA = a.room?.[0]?.price ?? Infinity
+      const priceB = b.room?.[0]?.price ?? Infinity
+      return priceA - priceB
+    })
+    return hotel
   }
 
   async findByPartnerId(partnerId: number) {
@@ -376,9 +386,6 @@ export class HotelRepo {
               where: {
                 deletedAt: null,
               },
-              orderBy: {
-                price: 'asc',
-              },
               include: {
                 roomAvailability: {
                   where: {
@@ -393,10 +400,31 @@ export class HotelRepo {
             roomBed: true,
           },
         },
+        room: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            roomType: {
+              select: {
+                id: true,
+                type: true,
+                adults: true,
+                child: true,
+                area: true,
+                serviceFeeRate: true,
+                description: true,
+                images: true,
+              },
+            },
+          },
+          orderBy: { price: 'asc' },
+          take: 1,
+        },
       },
       orderBy: finalOrderBy !== 'price' ? { [finalOrderBy]: order } : undefined,
     })
-    // Hàm kiểm tra phòng trống
+
     const isRoomAvailable = (room: any, dateRange: Date[], available: number): boolean => {
       for (const date of dateRange) {
         const availability = room.roomAvailability.find(
@@ -441,31 +469,23 @@ export class HotelRepo {
     // Post-processing: Filter hotels that have all required amenities
     if (amenityArray.length > 0) {
       filteredHotels = filteredHotels.filter((hotel) => {
-        // Get all amenity IDs for this hotel
         const hotelAmenityIds = hotel.hotelAmenity.map((item) => item.amenity.id)
-        // Check if all required amenities are present
         return amenityArray.every((amenityId) => hotelAmenityIds.includes(Number(amenityId)))
       })
     }
 
-    // Nếu orderBy là 'price', sắp xếp khách sạn theo giá phòng đầu tiên
+    //  orderBy là 'price' follow the price of the first room
     if (finalOrderBy === 'price') {
-      const filteredHotelsPrice = filteredHotels.map((hotel) => {
-        const price = hotel.roomType.sort((a, b) => a.room[0].price - b.room[0].price)[0]?.room[0]?.price ?? Infinity
-        return {
-          ...hotel,
-          price,
-        }
-      })
-      filteredHotels = filteredHotelsPrice.sort((a, b) => {
-        return order === 'asc' ? a.price - b.price : b.price - a.price
+      filteredHotels.sort((a, b) => {
+        const aPrice = a.roomType[0]?.room[0]?.price ?? Infinity
+        const bPrice = b.roomType[0]?.room[0]?.price ?? Infinity
+        return order === 'asc' ? aPrice - bPrice : bPrice - aPrice
       })
     }
 
     // Tính totalItems và totalPages
     const totalItems = filteredHotels.length
     const totalPages = Math.ceil(totalItems / limit)
-    // Áp dụng phân trang
     const paginatedHotels = filteredHotels.slice(skip, skip + take)
 
     return {
