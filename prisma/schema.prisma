@@ -206,8 +206,8 @@ model Promotion {
   deletedAt       DateTime? @db.Timestamp(6)
   createdAt       DateTime? @default(now()) @db.Timestamp(6)
   updatedAt       DateTime? @default(now()) @db.Timestamp(6)
-  Order           Order[]
-  User            User      @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order           Order[]
+  user            User      @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model RefreshToken {

@@ -59,3 +59,7 @@ export const capitalizeFirst = (input: string): string => {
   const trimmed = input.trim().toLowerCase()
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
 }
+
+export const toStartOfUTCDate = (date: Date): Date => {
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+}
