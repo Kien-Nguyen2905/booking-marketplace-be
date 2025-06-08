@@ -1,6 +1,6 @@
 import { AmenitySchema } from 'src/shared/models/shared-amenity.model'
 import { HotelSchema } from 'src/shared/models/shared-hotel.model'
-import { RoomBedSchema, RoomTypeSchema } from 'src/shared/models/shared-room-type'
+import { RoomTypeSchema } from 'src/shared/models/shared-room-type'
 import { RoomSchema } from 'src/shared/models/shared-room.model'
 import { z } from 'zod'
 
@@ -123,9 +123,9 @@ export const UpdateHotelAmenitiesResSchema = GetHotelAmenitiesResSchema
 
 export const GetHotelsByProvinceCodeResSchema = z.array(
   HotelSchema.extend({
-    roomType: z.array(
-      RoomTypeSchema.extend({
-        room: z.array(RoomSchema),
+    room: z.array(
+      RoomSchema.extend({
+        roomType: RoomTypeSchema,
       }),
     ),
   }),

@@ -210,20 +210,17 @@ export class HotelRepo {
         },
       },
       include: {
-        roomType: {
+        room: {
           where: {
-            deletedAt: null, // Chỉ bao gồm roomType chưa bị xóa
+            deletedAt: null,
           },
           include: {
-            room: {
-              where: {
-                deletedAt: null, // Chỉ bao gồm room chưa bị xóa
-              },
-              orderBy: {
-                price: 'asc',
-              },
-            },
+            roomType: true,
           },
+          orderBy: {
+            price: 'asc',
+          },
+          take: 1,
         },
       },
       take: 7,
