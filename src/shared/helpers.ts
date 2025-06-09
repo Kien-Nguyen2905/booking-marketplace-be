@@ -63,3 +63,15 @@ export const capitalizeFirst = (input: string): string => {
 export const toStartOfUTCDate = (date: Date): Date => {
   return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
 }
+
+export const generateCancelPaymentJobId = (paymentId: number) => {
+  return `paymentId-${paymentId}`
+}
+
+export const generateRoomUserId = (userId: number) => {
+  return `userId-${userId}`
+}
+
+export const generateRoomPartnerAndAdmin = () => {
+  return `roomPartnerAndAdmin`
+}

@@ -62,6 +62,10 @@ const configSchema = z.object({
   S3_REGION: z.string(),
   S3_ACCESS_KEY: z.string(),
   S3_SECRET_KEY: z.string(),
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.string(),
+  REDIS_PASS: z.string(),
+  REDIS_URL: z.string(),
 })
 
 // Validate environment variables

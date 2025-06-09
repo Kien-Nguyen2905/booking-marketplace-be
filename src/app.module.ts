@@ -22,7 +22,8 @@ import { AmenityModule } from './routes/amenity/amenity.module'
 import { RoomTypeModule } from './routes/room-type/room-type.module'
 import { RoomModule } from './routes/room/room.module'
 import { WishlistModule } from './routes/wishlist/wishlist.module'
-import { PromotionModule } from './routes/promotion/promotion.module';
+import { PromotionModule } from './routes/promotion/promotion.module'
+import { WebsocketModule } from 'src/websockets/websocket.module'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,6 +46,7 @@ import { PromotionModule } from './routes/promotion/promotion.module';
     RoomModule,
     WishlistModule,
     PromotionModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [
