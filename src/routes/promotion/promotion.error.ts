@@ -8,4 +8,6 @@ export const PromotionNotFoundException = new BadRequestException('Promotion not
 
 export const PromotionIsActiveException = new BadRequestException('Cannot update promotion active')
 
+export const DeletePromotionIsActiveException = new BadRequestException('Cannot delete promotion active')
+
 export const PromotionExpiredException = new BadRequestException('Cannot update promotion expired')

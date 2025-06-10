@@ -7,8 +7,8 @@ export const PromotionSchema = z.object({
   sharePercentage: z.number().min(0).max(100),
   validFrom: z.coerce
     .date()
-    .min(new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())), {
-      message: 'Valid from date must be today or later',
+    .min(new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1)), {
+      message: 'Valid from date must be from tomorrow',
     }),
   validUntil: z.coerce.date(),
   createdById: z.number().int().positive(),

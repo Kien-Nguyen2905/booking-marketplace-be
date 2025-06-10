@@ -6,6 +6,7 @@ import {
   UpdatePromotionBodyType,
 } from 'src/routes/promotion/promotion.model'
 import {
+  DeletePromotionIsActiveException,
   PromotionExpiredException,
   PromotionIsActiveException,
   PromotionNotFoundException,
@@ -71,6 +72,18 @@ export class PromotionService {
 
   async deletePromotion(id: number) {
     try {
+      const currentPromotion = await this.promotionRepo.find(id)
+      if (!currentPromotion) {
+        throw PromotionNotFoundException
+      }
+
+      const currentFromDate = format(new Date(currentPromotion.validFrom), 'yyyy-MM-dd')
+      const currentToDate = format(new Date(currentPromotion.validUntil), 'yyyy-MM-dd')
+      const currentDate = format(new Date(), 'yyyy-MM-dd')
+
+      if (currentFromDate <= currentDate && currentToDate >= currentDate) {
+        throw DeletePromotionIsActiveException
+      }
       return await this.promotionRepo.delete(id)
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
