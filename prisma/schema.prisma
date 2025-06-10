@@ -21,23 +21,17 @@ model Amenity {
 
 model Coupon {
   id                            Int           @id @default(autoincrement())
-  applierId                     Int?
   title                         String        @db.VarChar(100)
   description                   String        @db.VarChar(255)
   code                          String        @db.VarChar(50)
   amount                        Int
   percentage                    Float?        @default(0) @db.Real
-  sharePercentage               Float?        @default(0) @db.Real
   usedCount                     Int?          @default(0)
-  status                        CouponStatus? @default(PENDING)
   createdById                   Int?
-  updatedById                   Int?
   deletedAt                     DateTime?     @db.Timestamp(6)
   createdAt                     DateTime?     @default(now()) @db.Timestamp(6)
   updatedAt                     DateTime?     @default(now()) @db.Timestamp(6)
-  Partner                       Partner?      @relation(fields: [applierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User_Coupon_createdByIdToUser User?         @relation("Coupon_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User_Coupon_updatedByIdToUser User?         @relation("Coupon_updatedByIdToUser", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Order                         Order[]
 }
 
@@ -171,7 +165,6 @@ model Partner {
   createdById    Int?
   createdAt      DateTime?      @default(now()) @db.Timestamp(6)
   updatedAt      DateTime?      @default(now()) @db.Timestamp(6)
-  coupon         Coupon[]
   hotel          Hotel?
   user           User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -368,7 +361,6 @@ model User {
   createdAt                       DateTime?      @default(now()) @db.Timestamp(6)
   updatedAt                       DateTime?      @default(now()) @db.Timestamp(6)
   Coupon_Coupon_createdByIdToUser Coupon[]       @relation("Coupon_createdByIdToUser")
-  Coupon_Coupon_updatedByIdToUser Coupon[]       @relation("Coupon_updatedByIdToUser")
   Device                          Device[]
   Notify_Notify_createdByIdToUser Notify[]       @relation("Notify_createdByIdToUser")
   Notify_Notify_recipientIdToUser Notify[]       @relation("Notify_recipientIdToUser")
@@ -410,14 +402,6 @@ enum CategoryType {
   ROOM
   PUBLIC
   SERVICE
-}
-
-enum CouponStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  EXPIRED
-  RELEASED
 }
 
 enum HTTPMethod {

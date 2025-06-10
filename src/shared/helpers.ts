@@ -79,3 +79,7 @@ export const generateRoomPartnerToAdmin = () => {
 export const generateRoomAdminToPartner = () => {
   return `roomAdminToPartner`
 }
+
+export const generateCouponCode = () => {
+  return Math.random().toString(36).substring(2, 8).toUpperCase()
+}
