@@ -25,6 +25,7 @@ import { WishlistModule } from './routes/wishlist/wishlist.module'
 import { PromotionModule } from './routes/promotion/promotion.module'
 import { NotifyModule } from './routes/notify/notify.module'
 import { CouponModule } from './routes/coupon/coupon.module';
+import { CustomerModule } from './routes/customer/customer.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -49,6 +50,7 @@ import { CouponModule } from './routes/coupon/coupon.module';
     PromotionModule,
     NotifyModule,
     CouponModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [
