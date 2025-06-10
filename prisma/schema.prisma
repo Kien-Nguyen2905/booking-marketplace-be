@@ -105,16 +105,15 @@ model HotelAmenity {
 
 model Notify {
   id                            Int        @id @default(autoincrement())
-  recipientId                   Int
+  recipientId                   Int?
   title                         String     @db.VarChar(100)
   type                          NotifyType
   message                       String
   createdById                   Int
   readAt                        DateTime?  @db.Timestamp(6)
   createdAt                     DateTime?  @default(now()) @db.Timestamp(6)
-  updatedAt                     DateTime?  @default(now()) @db.Timestamp(6)
   User_Notify_createdByIdToUser User       @relation("Notify_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User_Notify_recipientIdToUser User       @relation("Notify_recipientIdToUser", fields: [recipientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User_Notify_recipientIdToUser User?      @relation("Notify_recipientIdToUser", fields: [recipientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Order {

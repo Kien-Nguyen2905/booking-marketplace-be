@@ -72,6 +72,10 @@ export const generateRoomUserId = (userId: number) => {
   return `userId-${userId}`
 }
 
-export const generateRoomPartnerAndAdmin = () => {
-  return `roomPartnerAndAdmin`
+export const generateRoomPartnerToAdmin = () => {
+  return `roomPartnerToAdmin`
+}
+
+export const generateRoomAdminToPartner = () => {
+  return `roomAdminToPartner`
 }

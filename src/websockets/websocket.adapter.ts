@@ -1,7 +1,7 @@
 import { INestApplicationContext } from '@nestjs/common'
 import { IoAdapter } from '@nestjs/platform-socket.io'
 import { ServerOptions, Server, Socket } from 'socket.io'
-import { generateRoomPartnerAndAdmin, generateRoomUserId } from 'src/shared/helpers'
+import { generateRoomAdminToPartner, generateRoomPartnerToAdmin, generateRoomUserId } from 'src/shared/helpers'
 import { TokenService } from 'src/shared/services/token.service'
 import { createAdapter } from '@socket.io/redis-adapter'
 import { createClient } from 'redis'
@@ -59,8 +59,11 @@ export class WebsocketAdapter extends IoAdapter {
     try {
       const { userId, roleName } = await this.tokenService.verifyAccessToken(accessToken)
 
-      if (roleName === ROLE_NAME.PARTNER || roleName === ROLE_NAME.ADMIN) {
-        await socket.join(generateRoomPartnerAndAdmin())
+      if (roleName === ROLE_NAME.PARTNER) {
+        await socket.join(generateRoomAdminToPartner())
+      }
+      if (roleName === ROLE_NAME.ADMIN) {
+        await socket.join(generateRoomPartnerToAdmin())
       }
       // Mỗi thiết bị chung account khi kết nối sẽ vô chung 1 room
       await socket.join(generateRoomUserId(userId))

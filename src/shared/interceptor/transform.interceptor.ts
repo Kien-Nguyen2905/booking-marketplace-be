@@ -27,7 +27,7 @@ export class CustomZodSerializerInterceptor {
         let message = defaultMessage
 
         // Kiểm tra xem response có phải là object và có chứa message không
-        if (response && typeof response === 'object' && 'message' in response) {
+        if (response && typeof response === 'object' && 'message' in response && !('id' in response)) {
           message = response.message || defaultMessage // Ưu tiên message từ response
           statusCode = response.statusCode || statusCode
           data = {} // Đặt data là object rỗng nếu response có message
