@@ -359,8 +359,8 @@ export class HotelRepo {
         roomType: {
           some: {
             deletedAt: null,
-            adults: { gte: adult },
-            child: child === 0 ? undefined : { gte: child },
+            adults: { equals: adult },
+            child: { equals: child },
             room: {
               some: {
                 deletedAt: null,

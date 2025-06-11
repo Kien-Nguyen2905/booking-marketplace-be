@@ -94,7 +94,7 @@ export class RoomRepo {
   }
 
   async findAvailableRoomsByRoomId(roomId: number, start: string, end: string) {
-    // Chuyển đổi chuỗi ngày sang Date
+    // Chuyển đổi chuỗi ngày sang Date ISO string
     const startDate = parse(start, 'dd-MM-yyyy', new Date())
     const endDate = parse(end, 'dd-MM-yyyy', new Date())
 
@@ -111,10 +111,8 @@ export class RoomRepo {
     if (!room) {
       throw RoomNotFoundException
     }
-
     // Lấy danh sách tất cả các ngày trong khoảng thời gian
     const dateRange = eachDayOfInterval({ start: startDate, end: endDate })
-
     // Lấy dữ liệu RoomAvailability trong khoảng thời gian
     const roomAvailabilities = await this.prismaService.roomAvailability.findMany({
       where: {
@@ -129,9 +127,9 @@ export class RoomRepo {
         availableRooms: true,
       },
     })
-
     // Tạo map từ ngày sang số phòng trống
     const availabilityMap = new Map<string, number>()
+
     roomAvailabilities.forEach((ra) => {
       const dateStr = format(ra.createdAt!, 'yyyy-MM-dd')
       availabilityMap.set(dateStr, ra.availableRooms)
