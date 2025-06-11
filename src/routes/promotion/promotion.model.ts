@@ -15,8 +15,7 @@ export const GetPromotionsQuerySchema = z
       .optional()
       .transform((date) => {
         if (!date) return undefined
-        // date is 2025-06-07
-        // parse to ISOString to query prisma
+        // parse to Date Object
         const parsed = parse(date, 'dd-MM-yyyy', new Date())
         // default convert local to UTC
         return toStartOfUTCDate(parsed) // đưa về 2025-06-07T00:00:00.000Z
@@ -26,6 +25,7 @@ export const GetPromotionsQuerySchema = z
       .optional()
       .transform((date) => {
         if (!date) return undefined
+        // parse to Date Object
         const parsed = parse(date, 'dd-MM-yyyy', new Date())
         return toStartOfUTCDate(parsed) // đưa về 2025-06-07T00:00:00.000Z
       }),

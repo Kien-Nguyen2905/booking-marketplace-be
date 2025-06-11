@@ -75,7 +75,7 @@ export class RoomRepo {
       },
       data: {
         ...data,
-        rangeLimitDate: data.policy === POLICY_TYPE.FREE_CANCELLATION ? data.rangeLimitDate : 0,
+        rangeLimitDate: data.policy === POLICY_TYPE.PAY_AT_HOTEL ? data.rangeLimitDate : 0,
         policy: data.policy as PolicyType,
         updatedAt: new Date(),
       },
