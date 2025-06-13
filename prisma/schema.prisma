@@ -120,23 +120,24 @@ model Order {
   checkinDate      DateTime     @db.Timestamp(6)
   checkoutDate     DateTime     @db.Timestamp(6)
   basePrice        Float        @db.Real
-  pointDiscount    Float        @db.Real
+  pointDiscount    Float        @default(0) @db.Real
   couponId         Int?
-  discountId       Int?
+  couponAmount     Float        @default(0) @db.Real
+  promotionId      Int?
+  promotionAmount  Float        @default(0) @db.Real
   vatAmount        Float        @db.Real
-  totalPrice       Float        @db.Real
   serviceFeeAmount Float        @db.Real
+  totalPrice       Float        @db.Real
   commissionAmount Float        @db.Real
   status           OrderStatus? @default(PENDING)
   paymentType      PaymentType
-  notes            String?
   arrivalTime      DateTime?    @db.Timestamp(6)
   checkoutTime     DateTime?    @db.Timestamp(6)
   createdAt        DateTime?    @default(now()) @db.Timestamp(6)
   updatedAt        DateTime?    @default(now()) @db.Timestamp(6)
   Coupon           Coupon?      @relation(fields: [couponId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Customer         Customer     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Promotion        Promotion?   @relation(fields: [discountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Promotion        Promotion?   @relation(fields: [promotionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Hotel            Hotel        @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Room             Room         @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User             User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)

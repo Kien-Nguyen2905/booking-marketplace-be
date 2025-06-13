@@ -1,7 +1,12 @@
 import { INestApplicationContext } from '@nestjs/common'
 import { IoAdapter } from '@nestjs/platform-socket.io'
 import { ServerOptions, Server, Socket } from 'socket.io'
-import { generateRoomAdminToPartner, generateRoomPartnerToAdmin, generateRoomUserId } from 'src/shared/helpers'
+import {
+  generateRoomAdminToPartner,
+  generateRoomPartnerId,
+  generateRoomPartnerToAdmin,
+  generateRoomUserId,
+} from 'src/shared/helpers'
 import { TokenService } from 'src/shared/services/token.service'
 import { createAdapter } from '@socket.io/redis-adapter'
 import { createClient } from 'redis'
@@ -61,6 +66,7 @@ export class WebsocketAdapter extends IoAdapter {
 
       if (roleName === ROLE_NAME.PARTNER) {
         await socket.join(generateRoomAdminToPartner())
+        await socket.join(generateRoomPartnerId(userId))
       }
       if (roleName === ROLE_NAME.ADMIN) {
         await socket.join(generateRoomPartnerToAdmin())
