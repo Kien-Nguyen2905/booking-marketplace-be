@@ -1,4 +1,4 @@
-import { Controller, Query, Param, Body, Post, Put, Delete, Get } from '@nestjs/common'
+import { Controller, Query, Param, Body, Post, Put, Delete, Get, HttpCode } from '@nestjs/common'
 import { CouponService } from './coupon.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import {
@@ -9,6 +9,7 @@ import {
   GetCouponsResDTO,
   UpdateCouponBodyDTO,
   UpdateCouponResDTO,
+  ValidateCouponBodyDTO,
 } from 'src/routes/coupon/coupon.dto'
 import { ActiveUser } from 'src/shared/decorators/active-user.decorator'
 import { IsPublic } from 'src/shared/decorators/auth.decorator'
@@ -27,6 +28,14 @@ export class CouponController {
       order: query.order,
       orderBy: query.orderBy,
     })
+  }
+
+  @Post('code')
+  @HttpCode(200)
+  @IsPublic()
+  @ZodSerializerDto(GetCouponResDTO)
+  async validateCoupon(@Body() body: ValidateCouponBodyDTO) {
+    return await this.couponService.validateCoupon(body.code)
   }
 
   @Get(':id')

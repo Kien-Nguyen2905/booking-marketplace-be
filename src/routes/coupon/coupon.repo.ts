@@ -108,4 +108,13 @@ export class CouponRepo {
       },
     })
   }
+
+  async findByCode(code: string) {
+    return await this.prismaService.coupon.findFirst({
+      where: {
+        code: code.toUpperCase(),
+        deletedAt: null,
+      },
+    })
+  }
 }

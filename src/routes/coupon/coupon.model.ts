@@ -44,6 +44,10 @@ export const UpdateCouponResSchema = CouponSchema
 
 export const DeleteCouponResSchema = CouponSchema
 
+export const ValidateCouponBodySchema = z.object({
+  code: z.string().nonempty(),
+})
+
 export type GetCouponsQueryType = z.infer<typeof GetCouponsQuerySchema>
 
 export type GetCouponsResType = z.infer<typeof GetCouponsResSchema>
@@ -53,3 +57,5 @@ export type UpdateCouponBodyType = z.infer<typeof UpdateCouponBodySchema>
 export type CreateCouponResType = z.infer<typeof CreateCouponResSchema>
 export type UpdateCouponResType = z.infer<typeof UpdateCouponResSchema>
 export type DeleteCouponResType = z.infer<typeof DeleteCouponResSchema>
+
+export type ValidateCouponBodyType = z.infer<typeof ValidateCouponBodySchema>

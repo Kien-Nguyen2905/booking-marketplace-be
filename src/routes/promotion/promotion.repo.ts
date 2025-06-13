@@ -106,12 +106,11 @@ export class PromotionRepo {
     // parse về ISOString để query prisma
     const startDate = validFrom ? parse(validFrom, 'dd-MM-yyyy', new Date()) : new Date()
     const endDate = validUntil ? parse(validUntil, 'dd-MM-yyyy', new Date()) : startDate
-
     // Query promotions that overlap with the given date range
     const promotions = await this.prismaService.promotion.findMany({
       where: {
         deletedAt: null,
-        AND: [{ validFrom: { lte: toStartOfUTCDate(endDate) } }, { validUntil: { gt: toStartOfUTCDate(startDate) } }],
+        AND: [{ validFrom: { lt: toStartOfUTCDate(endDate) } }, { validUntil: { gt: toStartOfUTCDate(startDate) } }],
       },
       select: {
         id: true,
@@ -128,7 +127,6 @@ export class PromotionRepo {
         validFrom: 'asc',
       },
     })
-
     const today = toStartOfUTCDate(new Date())
 
     const todayPromotions = promotions.find((promotion) => {

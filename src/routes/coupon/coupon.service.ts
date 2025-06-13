@@ -72,4 +72,8 @@ export class CouponService {
       throw error
     }
   }
+
+  async validateCoupon(code: string) {
+    return await this.couponRepo.findByCode(code)
+  }
 }
