@@ -7,7 +7,7 @@ export const CouponSchema = z.object({
   code: z.string().max(50),
   amount: z.number().int().positive(),
   percentage: z.number().min(0).max(15).int(),
-  usedCount: z.number().int().default(0),
+  available: z.number().int().default(0),
   createdById: z.number().int().positive(),
   createdAt: z.date().nullable(),
   updatedAt: z.date().nullable(),

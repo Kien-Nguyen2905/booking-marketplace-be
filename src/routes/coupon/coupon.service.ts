@@ -17,7 +17,7 @@ export class CouponService {
     if (!coupon) {
       throw CouponNotFoundException
     }
-    if ((coupon.usedCount || 0) > 0) {
+    if (coupon.amount - coupon.available! !== 0) {
       throw CouponUsedException
     }
     return coupon

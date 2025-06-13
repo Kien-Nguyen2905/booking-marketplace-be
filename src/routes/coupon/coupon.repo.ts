@@ -79,6 +79,7 @@ export class CouponRepo {
       data: {
         ...data,
         code: generateCouponCode(),
+        available: data.amount,
         percentage: data.percentage / 100,
         createdById,
       },
@@ -89,10 +90,12 @@ export class CouponRepo {
     return await this.prismaService.coupon.update({
       where: {
         id,
+        deletedAt: null,
       },
       data: {
         ...data,
         percentage: data.percentage / 100,
+        available: data.amount,
         updatedAt: new Date(),
       },
     })
@@ -114,6 +117,9 @@ export class CouponRepo {
       where: {
         code: code.toUpperCase(),
         deletedAt: null,
+        available: {
+          gte: 1,
+        },
       },
     })
   }

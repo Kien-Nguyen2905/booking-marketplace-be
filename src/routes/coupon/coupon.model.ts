@@ -26,7 +26,7 @@ export const CreateCouponBodySchema = CouponSchema.omit({
   updatedAt: true,
   code: true,
   createdById: true,
-  usedCount: true,
+  available: true,
 }).strict()
 
 export const UpdateCouponBodySchema = CouponSchema.omit({
@@ -35,7 +35,7 @@ export const UpdateCouponBodySchema = CouponSchema.omit({
   updatedAt: true,
   code: true,
   createdById: true,
-  usedCount: true,
+  available: true,
 }).strict()
 
 export const CreateCouponResSchema = CouponSchema
