@@ -25,15 +25,20 @@ import { RoomModule } from './routes/room/room.module'
 import { WishlistModule } from './routes/wishlist/wishlist.module'
 import { PromotionModule } from './routes/promotion/promotion.module'
 import { NotifyModule } from './routes/notify/notify.module'
-import { CouponModule } from './routes/coupon/coupon.module';
-import { CustomerModule } from './routes/customer/customer.module';
-import { OrderModule } from './routes/order/order.module';
-import { PaymentModule } from './routes/payment/payment.module';
-import { TransactionModule } from './routes/transaction/transaction.module';
-import { RefundModule } from './routes/refund/refund.module';
-import { ReviewModule } from './routes/review/review.module';
+import { CouponModule } from './routes/coupon/coupon.module'
+import { CustomerModule } from './routes/customer/customer.module'
+import { OrderModule } from './routes/order/order.module'
+import { PaymentModule } from './routes/payment/payment.module'
+import { TransactionModule } from './routes/transaction/transaction.module'
+import { RefundModule } from './routes/refund/refund.module'
+import { ReviewModule } from './routes/review/review.module'
+import { ScheduleModule } from '@nestjs/schedule'
+import { RemoveRefreshTokenCronjob } from 'src/cronjobs/remove-refresh-token.cronjob'
+import { CheckoutOrderCronjob } from 'src/cronjobs/checkout-order.cronjobs'
+import { RemoveRoomAvailabilityCronjob } from 'src/cronjobs/remove-roomavailability.cronjobs'
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [process.env.NODE_ENV === 'production' ? '.env.production' : '.env'],
@@ -80,6 +85,9 @@ import { ReviewModule } from './routes/review/review.module';
     },
     MailConsumer,
     OrderConsumer,
+    RemoveRefreshTokenCronjob,
+    CheckoutOrderCronjob,
+    RemoveRoomAvailabilityCronjob,
   ],
 })
 export class AppModule {}
