@@ -112,7 +112,6 @@ export class HotelRepo {
             },
           },
         },
-        review: true,
       },
     })
     hotel?.roomType?.sort((a, b) => {

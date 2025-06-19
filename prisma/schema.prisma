@@ -26,7 +26,7 @@ model Coupon {
   code                          String        @db.VarChar(50)
   amount                        Int
   percentage                    Float?        @default(0) @db.Real
-  usedCount                     Int?          @default(0)
+  available                     Int?          @default(0)
   createdById                   Int?
   deletedAt                     DateTime?     @db.Timestamp(6)
   createdAt                     DateTime?     @default(now()) @db.Timestamp(6)
@@ -103,10 +103,10 @@ model Notify {
   title                         String     @db.VarChar(100)
   type                          NotifyType
   message                       String
-  createdById                   Int
+  createdById                   Int?
   readAt                        DateTime?  @db.Timestamp(6)
   createdAt                     DateTime?  @default(now()) @db.Timestamp(6)
-  User_Notify_createdByIdToUser User       @relation("Notify_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User_Notify_createdByIdToUser User?      @relation("Notify_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User_Notify_recipientIdToUser User?      @relation("Notify_recipientIdToUser", fields: [recipientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -117,8 +117,8 @@ model Order {
   hotelId          Int
   roomId           Int
   quantity         Int
-  checkinDate      DateTime     @db.Timestamp(6)
-  checkoutDate     DateTime     @db.Timestamp(6)
+  checkinDate      DateTime     @db.Date
+  checkoutDate     DateTime     @db.Date
   basePrice        Float        @db.Real
   pointDiscount    Float        @default(0) @db.Real
   couponId         Int?
@@ -132,16 +132,18 @@ model Order {
   status           OrderStatus? @default(PENDING)
   paymentType      PaymentType
   arrivalTime      DateTime?    @db.Timestamp(6)
+  reason           String?      @db.VarChar(255)
   checkoutTime     DateTime?    @db.Timestamp(6)
   createdAt        DateTime?    @default(now()) @db.Timestamp(6)
   updatedAt        DateTime?    @default(now()) @db.Timestamp(6)
-  Coupon           Coupon?      @relation(fields: [couponId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Customer         Customer     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Promotion        Promotion?   @relation(fields: [promotionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Hotel            Hotel        @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Room             Room         @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User             User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Review           Review?
+  coupon           Coupon?      @relation(fields: [couponId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer         Customer     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion        Promotion?   @relation(fields: [promotionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotel            Hotel        @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  room             Room         @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user             User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  review           Review?
+  refund           Refund?
 }
 
 model Partner {
@@ -215,14 +217,15 @@ model RefreshToken {
 
 model Refund {
   id          Int           @id @default(autoincrement())
-  orderId     Int
+  orderId     Int           @unique
   amount      Float         @db.Real
-  reason      String?
+  reason      String        @db.VarChar(255)
   status      RefundStatus? @default(PENDING)
   createdById Int
   createdAt   DateTime?     @default(now()) @db.Timestamp(6)
   updatedAt   DateTime?     @default(now()) @db.Timestamp(6)
-  User        User          @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user        User          @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order       Order         @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Review {
@@ -230,14 +233,13 @@ model Review {
   orderId   Int       @unique
   hotelId   Int
   userId    Int
-  title     String
-  content   String
-  image     String?
+  title     String    @db.VarChar(100)
+  content   String    @db.VarChar(255)
   rating    Int
   createdAt DateTime? @default(now()) @db.Timestamp(6)
   Hotel     Hotel     @relation(fields: [hotelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Order     Order     @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Role {
@@ -272,6 +274,7 @@ model RoomAvailability {
   id             Int       @id @default(autoincrement())
   roomId         Int
   availableRooms Int
+  version        Int?      @default(0)
   createdAt      DateTime? @default(now()) @db.Date
   room           Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -442,7 +445,10 @@ enum OrderStatus {
   CONFIRMED
   FAILED
   CANCELED
+  PENDING_REFUND
   REFUNDED
+  CHECKOUT
+  NO_SHOW
 }
 
 enum PartnerStatus {
@@ -465,7 +471,6 @@ enum PolicyType {
 enum RefundStatus {
   PENDING
   COMPLETED
-  FAILED
 }
 
 enum RoomBedType {

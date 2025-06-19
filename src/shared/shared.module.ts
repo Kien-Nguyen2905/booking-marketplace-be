@@ -12,9 +12,10 @@ import { APIKeyGuard } from 'src/shared/guards/api-key.guard'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthenticationGuard } from 'src/shared/guards/authentication.guard'
 import { BullModule } from '@nestjs/bullmq'
-import { SEND_MAIL_QUEUE_NAME } from 'src/shared/constants/queue.constant'
+import { ORDER_QUEUE_NAME, SEND_MAIL_QUEUE_NAME } from 'src/shared/constants/queue.constant'
 import { MailProducer } from 'src/shared/producers/mail.producer'
 import { S3Service } from 'src/shared/services/s3.service'
+import { SharedOrderRepository } from 'src/shared/repositories/shared-order.repo'
 
 const sharedServices = [
   PrismaService,
@@ -24,6 +25,7 @@ const sharedServices = [
   SharedUserRepository,
   SharedRoleRepository,
   TwoFactorService,
+  SharedOrderRepository,
   MailProducer,
   S3Service,
 ]
@@ -44,6 +46,9 @@ const sharedServices = [
     JwtModule,
     BullModule.registerQueue({
       name: SEND_MAIL_QUEUE_NAME,
+    }),
+    BullModule.registerQueue({
+      name: ORDER_QUEUE_NAME,
     }),
   ],
 })

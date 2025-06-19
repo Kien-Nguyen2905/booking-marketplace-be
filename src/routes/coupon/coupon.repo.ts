@@ -118,7 +118,7 @@ export class CouponRepo {
         code: code.toUpperCase(),
         deletedAt: null,
         available: {
-          gte: 1,
+          gt: 0,
         },
       },
     })

@@ -1,6 +1,6 @@
 import { AmenitySchema } from 'src/shared/models/shared-amenity.model'
 import { HotelSchema } from 'src/shared/models/shared-hotel.model'
-import { RoomTypeSchema } from 'src/shared/models/shared-room-type'
+import { RoomBedSchema, RoomTypeSchema } from 'src/shared/models/shared-room-type'
 import { RoomSchema } from 'src/shared/models/shared-room.model'
 import { z } from 'zod'
 
@@ -12,7 +12,16 @@ export const GetHotelsResSchema = z.object({
   totalPages: z.number(),
 })
 
-export const GetHotelResSchema = HotelSchema
+export const GetHotelResSchema = HotelSchema.extend({
+  hotelAmenity: z.array(z.object({ amenity: AmenitySchema })),
+  roomType: z.array(
+    RoomTypeSchema.extend({
+      room: z.array(RoomSchema),
+      roomBed: z.array(RoomBedSchema),
+      roomTypeAmenity: z.array(z.object({ amenity: AmenitySchema })),
+    }),
+  ),
+})
 
 export const GetHotelsQuerySchema = z
   .object({

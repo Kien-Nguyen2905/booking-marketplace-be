@@ -2,18 +2,45 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Queue } from 'bullmq'
 import { InjectQueue } from '@nestjs/bullmq'
 import { SEND_MAIL_QUEUE_NAME } from 'src/shared/constants/queue.constant'
-import { PayloadSendNewDeviceLogin, PayloadSendCode } from 'src/shared/services/email.service'
+import {
+  PayloadSendNewDeviceLogin,
+  PayloadSendCode,
+  PayloadOrderCanceled,
+  PayloadNoShowCanceled,
+  PayloadCheckoutSuccess,
+  PayloadPartnerCancelRefund,
+  PayloadCustomerOrderCancel,
+  PayloadCustomerOrderRefund,
+  PayloadOrderRefundSuccess,
+  PayloadOrderSuccess,
+} from 'src/shared/services/email.service'
 import { FailedToSendMailException } from 'src/routes/auth/auth.error'
 
 export enum MailType {
   OTP = 'otp',
   TWO_FA = '2fa',
   NEW_DEVICE_LOGIN = 'new_device_login',
+  ORDER_CANCELED = 'order_canceled',
+  NO_SHOW_CANCELED = 'no_show_canceled',
+  CHECKOUT_SUCCESS = 'checkout_success',
+  PARTNER_CANCEL_REFUND = 'partner_cancel_refund',
+  CUSTOMER_ORDER_CANCEL = 'customer_order_cancel',
+  CUSTOMER_ORDER_REFUND = 'customer_order_refund',
+  ORDER_REFUND_SUCCESS = 'order_refund_success',
+  ORDER_SUCCESS = 'order_success',
 }
 
 export type MailData = {
   type: MailType
-  data: PayloadSendCode | PayloadSendNewDeviceLogin
+  data:
+    | PayloadSendCode
+    | PayloadSendNewDeviceLogin
+    | PayloadOrderCanceled
+    | PayloadNoShowCanceled
+    | PayloadCheckoutSuccess
+    | PayloadPartnerCancelRefund
+    | PayloadCustomerOrderCancel
+    | PayloadCustomerOrderRefund
 }
 
 @Injectable()
@@ -63,6 +90,62 @@ export class MailProducer {
   async sendNewDeviceMail(payload: PayloadSendNewDeviceLogin) {
     return await this.sendMail({
       type: MailType.NEW_DEVICE_LOGIN,
+      data: payload,
+    })
+  }
+
+  async sendOrderCanceledMail(payload: PayloadOrderCanceled) {
+    return await this.sendMail({
+      type: MailType.ORDER_CANCELED,
+      data: payload,
+    })
+  }
+
+  async sendNoShowCanceledMail(payload: PayloadNoShowCanceled) {
+    return await this.sendMail({
+      type: MailType.NO_SHOW_CANCELED,
+      data: payload,
+    })
+  }
+
+  async sendCheckoutSuccessMail(payload: PayloadCheckoutSuccess) {
+    return await this.sendMail({
+      type: MailType.CHECKOUT_SUCCESS,
+      data: payload,
+    })
+  }
+
+  async sendPartnerCancelRefundMail(payload: PayloadPartnerCancelRefund) {
+    return await this.sendMail({
+      type: MailType.PARTNER_CANCEL_REFUND,
+      data: payload,
+    })
+  }
+
+  async sendCustomerOrderCancelMail(payload: PayloadCustomerOrderCancel) {
+    return await this.sendMail({
+      type: MailType.CUSTOMER_ORDER_CANCEL,
+      data: payload,
+    })
+  }
+
+  async sendCustomerOrderRefundMail(payload: PayloadCustomerOrderRefund) {
+    return await this.sendMail({
+      type: MailType.CUSTOMER_ORDER_REFUND,
+      data: payload,
+    })
+  }
+
+  async sendOrderRefundSuccessMail(payload: PayloadOrderRefundSuccess) {
+    return await this.sendMail({
+      type: MailType.ORDER_REFUND_SUCCESS,
+      data: payload,
+    })
+  }
+
+  async sendOrderSuccessMail(payload: PayloadOrderSuccess) {
+    return await this.sendMail({
+      type: MailType.ORDER_SUCCESS,
       data: payload,
     })
   }

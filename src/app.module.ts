@@ -9,6 +9,7 @@ import CustomZodValidationPipe from 'src/shared/pipes/custom-zod-validation.pipe
 import { CustomZodSerializerInterceptor } from 'src/shared/interceptor/transform.interceptor'
 import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter'
 import { MailConsumer } from 'src/queues/mail.consumer'
+import { OrderConsumer } from 'src/queues/order.consumer'
 import { RedisModule } from 'src/redis/redis.module'
 import { BullMQModule } from 'src/bull/bull.module'
 import { PermissionModule } from 'src/routes/permission/permission.module'
@@ -26,6 +27,11 @@ import { PromotionModule } from './routes/promotion/promotion.module'
 import { NotifyModule } from './routes/notify/notify.module'
 import { CouponModule } from './routes/coupon/coupon.module';
 import { CustomerModule } from './routes/customer/customer.module';
+import { OrderModule } from './routes/order/order.module';
+import { PaymentModule } from './routes/payment/payment.module';
+import { TransactionModule } from './routes/transaction/transaction.module';
+import { RefundModule } from './routes/refund/refund.module';
+import { ReviewModule } from './routes/review/review.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -51,6 +57,11 @@ import { CustomerModule } from './routes/customer/customer.module';
     NotifyModule,
     CouponModule,
     CustomerModule,
+    OrderModule,
+    PaymentModule,
+    TransactionModule,
+    RefundModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [
@@ -68,6 +79,7 @@ import { CustomerModule } from './routes/customer/customer.module';
       useClass: HttpExceptionFilter,
     },
     MailConsumer,
+    OrderConsumer,
   ],
 })
 export class AppModule {}

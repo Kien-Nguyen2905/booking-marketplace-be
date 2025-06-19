@@ -1,0 +1,12 @@
+export const ORDER_STATUS = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  FAILED: 'FAILED',
+  CANCELED: 'CANCELED',
+  PENDING_REFUND: 'PENDING_REFUND',
+  REFUNDED: 'REFUNDED',
+  CHECKOUT: 'CHECKOUT',
+  NO_SHOW: 'NO_SHOW',
+} as const
+
+export type OrderStatusType = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS]

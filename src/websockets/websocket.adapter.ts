@@ -2,6 +2,7 @@ import { INestApplicationContext } from '@nestjs/common'
 import { IoAdapter } from '@nestjs/platform-socket.io'
 import { ServerOptions, Server, Socket } from 'socket.io'
 import {
+  generateRoomAdmin,
   generateRoomAdminToPartner,
   generateRoomPartnerId,
   generateRoomPartnerToAdmin,
@@ -69,11 +70,11 @@ export class WebsocketAdapter extends IoAdapter {
         await socket.join(generateRoomPartnerId(userId))
       }
       if (roleName === ROLE_NAME.ADMIN) {
+        await socket.join(generateRoomAdmin())
         await socket.join(generateRoomPartnerToAdmin())
       }
       // Mỗi thiết bị chung account khi kết nối sẽ vô chung 1 room
       await socket.join(generateRoomUserId(userId))
-
       next()
     } catch (error) {
       next(error)

@@ -84,6 +84,12 @@ export const generateRoomAdminToPartner = () => {
   return `roomAdminToPartner`
 }
 
+export const generateRoomAdmin = () => {
+  return `roomAdmin`
+}
+
 export const generateCouponCode = () => {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
 }
+
+export const getNowUTC7 = (): Date => new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }))

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Order" ALTER COLUMN "checkinDate" SET DATA TYPE DATE,
+ALTER COLUMN "checkoutDate" SET DATA TYPE DATE;
