@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { eachDayOfInterval, format, isValid, parse } from 'date-fns'
 import { RoomNotFoundException } from 'src/routes/room/room.error'
 import { CreateRoomBodyType } from 'src/routes/room/room.model'
+import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { POLICY_TYPE, PolicyType } from 'src/shared/constants/room.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
@@ -23,6 +24,38 @@ export class RoomRepo {
       where: {
         id,
         deletedAt: null,
+      },
+    })
+  }
+
+  async findRoomIncludeOrderPending(id: number) {
+    return await this.prismaService.room.findUnique({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: {
+        order: {
+          where: {
+            status: ORDER_STATUS.PENDING,
+          },
+        },
+      },
+    })
+  }
+
+  async findRoomIncludeOrderConfirm(id: number) {
+    return await this.prismaService.room.findUnique({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: {
+        order: {
+          where: {
+            status: ORDER_STATUS.CONFIRMED,
+          },
+        },
       },
     })
   }
@@ -69,17 +102,47 @@ export class RoomRepo {
   }
 
   async update({ data, id }: { data: CreateRoomBodyType; id: number }) {
-    return await this.prismaService.room.update({
-      where: {
-        id,
-      },
-      data: {
-        ...data,
-        rangeLimitDate: data.policy === POLICY_TYPE.PAY_AT_HOTEL ? data.rangeLimitDate : 0,
-        policy: data.policy as PolicyType,
-        updatedAt: new Date(),
-      },
+    const room = await this.prismaService.$transaction(async (tx) => {
+      const roomAvailabilities = await tx.roomAvailability.findMany({
+        where: {
+          roomId: id,
+        },
+      })
+      for (const availability of roomAvailabilities) {
+        const oldTotalRooms = availability.totalRooms
+        const oldAvailableRooms = availability.availableRooms
+        let newAvailableRooms
+
+        if (data.quantity < oldTotalRooms) {
+          // decrease quantity
+          newAvailableRooms = oldAvailableRooms - (oldTotalRooms - data.quantity)
+        } else {
+          // increase quantity
+          newAvailableRooms = oldAvailableRooms + Math.abs(oldTotalRooms - data.quantity)
+        }
+
+        await tx.roomAvailability.update({
+          where: { id: availability.id },
+          data: {
+            totalRooms: data.quantity,
+            availableRooms: Math.max(0, newAvailableRooms),
+            version: { increment: 1 },
+          },
+        })
+      }
+      return await tx.room.update({
+        where: {
+          id,
+        },
+        data: {
+          ...data,
+          rangeLimitDate: data.policy === POLICY_TYPE.PAY_AT_HOTEL ? data.rangeLimitDate : 0,
+          policy: data.policy as PolicyType,
+          updatedAt: new Date(),
+        },
+      })
     })
+    return room
   }
 
   async delete(id: number) {

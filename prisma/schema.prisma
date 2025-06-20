@@ -274,6 +274,7 @@ model RoomAvailability {
   id             Int       @id @default(autoincrement())
   roomId         Int
   availableRooms Int
+  totalRooms     Int       @default(0)
   version        Int?      @default(0)
   createdAt      DateTime? @default(now()) @db.Date
   room           Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)

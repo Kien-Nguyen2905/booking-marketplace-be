@@ -196,6 +196,13 @@ export const ExportPartnerRevenueResSchema = z.array(
   }),
 )
 
+export const FindOrdersExceedQuantitySchema = z.object({
+  roomId: z.number(),
+  quantity: z.number(),
+})
+
+export const FindOrdersExceedQuantityResSchema = z.array(OrderSchema)
+
 export type GetOrdersQueryType = z.infer<typeof GetOrdersQuerySchema>
 export type GetOrdersResType = z.infer<typeof GetOrdersResSchema>
 
@@ -213,3 +220,6 @@ export type UpdateOrderResType = z.infer<typeof UpdateOrderResSchema>
 
 export type ExportPartnerRevenueType = z.infer<typeof ExportPartnerRevenueSchema>
 export type ExportPartnerRevenueResType = z.infer<typeof ExportPartnerRevenueResSchema>
+
+export type FindOrdersExceedQuantityType = z.infer<typeof FindOrdersExceedQuantitySchema>
+export type FindOrdersExceedQuantityResType = z.infer<typeof FindOrdersExceedQuantityResSchema>

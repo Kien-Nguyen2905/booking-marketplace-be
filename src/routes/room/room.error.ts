@@ -9,3 +9,7 @@ export const RoomPolicyAlreadyExistsException = new UnprocessableEntityException
     path: 'policy',
   },
 ])
+
+export const RoomInOrderException = new BadRequestException('Room is being ordered')
+
+export const RoomInOrderConfirmedException = new BadRequestException('Room in order confirmed')

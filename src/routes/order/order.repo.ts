@@ -344,6 +344,7 @@ export class OrderRepo {
               createdAt: toStartOfUTCDate(date),
               availableRooms: room.quantity - quantity,
               version: 0,
+              totalRooms: room.quantity,
             },
           })
         }
@@ -890,5 +891,17 @@ export class OrderRepo {
       .sort((a, b) => b.totalOrderValue - a.totalOrderValue)
 
     return result
+  }
+
+  async findOrdersExceedQuantityByRoomId(roomId: number, quantity: number) {
+    return await this.prismaService.order.findMany({
+      where: {
+        roomId,
+        status: ORDER_STATUS.CONFIRMED,
+        quantity: {
+          gt: quantity,
+        },
+      },
+    })
   }
 }

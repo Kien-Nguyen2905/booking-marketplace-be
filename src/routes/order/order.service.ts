@@ -404,4 +404,8 @@ export class OrderService {
   async exportPartnerRevenue({ dateFrom, dateTo }: ExportPartnerRevenueType) {
     return await this.orderRepo.exportPartnerRevenue({ dateFrom, dateTo })
   }
+
+  async findOrdersExceedQuantityByRoomId(roomId: number, quantity: number) {
+    return await this.orderRepo.findOrdersExceedQuantityByRoomId(roomId, quantity)
+  }
 }

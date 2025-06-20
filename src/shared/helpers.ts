@@ -60,6 +60,7 @@ export const capitalizeFirst = (input: string): string => {
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
 }
 
+// Loại bỏ giờ chỉ lấy ngày
 export const toStartOfUTCDate = (date: Date): Date => {
   return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
 }

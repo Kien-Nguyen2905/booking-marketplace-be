@@ -5,6 +5,8 @@ import {
   CreateOrderBodyDTO,
   ExportPartnerRevenueDTO,
   ExportPartnerRevenueResDTO,
+  FindOrdersExceedQuantityDTO,
+  FindOrdersExceedQuantityResDTO,
   GetOrderByIdResDTO,
   GetOrdersByUserIdQueryDTO,
   GetOrdersByUserIdResDTO,
@@ -31,7 +33,6 @@ export class OrderController {
     return await this.orderService.listMyOrder(query, userId)
   }
 
-
   @Get('/export-partner-revenue')
   @ZodSerializerDto(ExportPartnerRevenueResDTO)
   async exportPartnerRevenue(@Query() query: ExportPartnerRevenueDTO) {
@@ -42,6 +43,12 @@ export class OrderController {
   @ZodSerializerDto(GetOrdersResDTO)
   async listPartnerOrder(@Query() query: GetOrdersQueryDTO, @Param('hotelId') hotelId: string) {
     return await this.orderService.listPartnerOrder({ ...query, hotelId: +hotelId })
+  }
+
+  @Post('exceed-quantity')
+  @ZodSerializerDto(FindOrdersExceedQuantityResDTO)
+  async findOrdersExceedQuantityByRoomId(@Body() body: FindOrdersExceedQuantityDTO) {
+    return await this.orderService.findOrdersExceedQuantityByRoomId(body.roomId, body.quantity)
   }
 
   @Get(':id')

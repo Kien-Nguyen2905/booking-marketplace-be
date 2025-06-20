@@ -3,6 +3,8 @@ import {
   CreateOrderBodySchema,
   ExportPartnerRevenueResSchema,
   ExportPartnerRevenueSchema,
+  FindOrdersExceedQuantityResSchema,
+  FindOrdersExceedQuantitySchema,
   GetOrderByIdResSchema,
   GetOrdersByUserIdQuerySchema,
   GetOrdersByUserIdResSchema,
@@ -31,3 +33,7 @@ export class UpdateOrderResDTO extends createZodDto(UpdateOrderResSchema) {}
 export class ExportPartnerRevenueDTO extends createZodDto(ExportPartnerRevenueSchema) {}
 
 export class ExportPartnerRevenueResDTO extends createZodDto(ExportPartnerRevenueResSchema) {}
+
+export class FindOrdersExceedQuantityDTO extends createZodDto(FindOrdersExceedQuantitySchema) {}
+
+export class FindOrdersExceedQuantityResDTO extends createZodDto(FindOrdersExceedQuantityResSchema) {}
