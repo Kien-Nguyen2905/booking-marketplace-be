@@ -5,13 +5,13 @@ import { RoleSchema } from 'src/shared/models/shared-role.model'
 import { z } from 'zod'
 export const UserSchema = z.object({
   id: z.number().int().positive(),
-  email: z.string().email().max(100),
-  password: z.string().min(6).max(50),
+  email: z.string().email().max(255),
+  password: z.string().min(6).max(255),
   fullName: z
     .string()
     .trim()
     .min(2)
-    .max(100)
+    .max(255)
     .regex(/^[A-Za-zÀ-ỹ\s]+$/)
     .nullable(),
   phoneNumber: z.string().min(9).max(20).nullable(),
