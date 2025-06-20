@@ -157,15 +157,15 @@ export class GoogleService {
           deviceType,
         })
         // Send email notification for new device
-        await this.mailProducer.sendNewDeviceMail({
-          email: user.email,
-          deviceInfo: {
-            browser,
-            os,
-            deviceType,
-          },
-          loginTime: new Date(),
-        })
+        // await this.mailProducer.sendNewDeviceMail({
+        //   email: user.email,
+        //   deviceInfo: {
+        //     browser,
+        //     os,
+        //     deviceType,
+        //   },
+        //   loginTime: new Date(),
+        // })
         // Create accessToken and refreshToken
         authTokens = await this.authService.generateTokens({
           userId: user.id,

@@ -233,15 +233,15 @@ export class AuthService {
         deviceType,
       })
       // Send email notification for new device
-      await this.mailProducer.sendNewDeviceMail({
-        email: user.email,
-        deviceInfo: {
-          browser,
-          os,
-          deviceType,
-        },
-        loginTime: new Date(),
-      })
+      // await this.mailProducer.sendNewDeviceMail({
+      //   email: user.email,
+      //   deviceInfo: {
+      //     browser,
+      //     os,
+      //     deviceType,
+      //   },
+      //   loginTime: new Date(),
+      // })
       // Create accessToken and refreshToken
       const tokens = await this.generateTokens({
         userId: user.id,
@@ -317,15 +317,15 @@ export class AuthService {
         deviceType,
       })
       // Send email notification for new device
-      await this.mailProducer.sendNewDeviceMail({
-        email: user.email,
-        deviceInfo: {
-          browser,
-          os,
-          deviceType,
-        },
-        loginTime: new Date(),
-      })
+      // await this.mailProducer.sendNewDeviceMail({
+      //   email: user.email,
+      //   deviceInfo: {
+      //     browser,
+      //     os,
+      //     deviceType,
+      //   },
+      //   loginTime: new Date(),
+      // })
       // Create accessToken and refreshToken
       const tokens = await this.generateTokens({
         userId: user.id,
