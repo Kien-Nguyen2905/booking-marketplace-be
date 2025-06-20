@@ -3,6 +3,8 @@ import { OrderService } from './order.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import {
   CreateOrderBodyDTO,
+  ExportPartnerRevenueDTO,
+  ExportPartnerRevenueResDTO,
   GetOrderByIdResDTO,
   GetOrdersByUserIdQueryDTO,
   GetOrdersByUserIdResDTO,
@@ -27,6 +29,13 @@ export class OrderController {
   @ZodSerializerDto(GetOrdersByUserIdResDTO)
   async listMyOrder(@Query() query: GetOrdersByUserIdQueryDTO, @ActiveUser('userId') userId: number) {
     return await this.orderService.listMyOrder(query, userId)
+  }
+
+
+  @Get('/export-partner-revenue')
+  @ZodSerializerDto(ExportPartnerRevenueResDTO)
+  async exportPartnerRevenue(@Query() query: ExportPartnerRevenueDTO) {
+    return await this.orderService.exportPartnerRevenue(query)
   }
 
   @Get('/hotel/:hotelId')

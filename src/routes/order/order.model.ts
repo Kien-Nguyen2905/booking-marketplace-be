@@ -155,6 +155,47 @@ export const UpdateOrderBodySchema = OrderSchema.pick({
 
 export const UpdateOrderResSchema = OrderSchema
 
+export const ExportPartnerRevenueSchema = z.object({
+  dateFrom: z
+    .string()
+    .optional()
+    .transform((date) => {
+      if (!date) return undefined
+      // parse to Date Object
+      const parsed = parse(date, 'dd-MM-yyyy', new Date())
+      // default convert local to UTC
+      return toStartOfUTCDate(parsed) // đưa về 2025-06-07T00:00:00.000Z
+    }),
+  dateTo: z
+    .string()
+    .optional()
+    .transform((date) => {
+      if (!date) return undefined
+      // parse to Date Object
+      const parsed = parse(date, 'dd-MM-yyyy', new Date())
+      // default convert local to UTC
+      return toStartOfUTCDate(parsed) // đưa về 2025-06-07T00:00:00.000Z
+    }),
+})
+
+export const ExportPartnerRevenueResSchema = z.array(
+  z.object({
+    startDate: z.string(),
+    endDate: z.string(),
+    partnerName: z.string(),
+    hotelName: z.string(),
+    accountNumber: z.string(),
+    bankName: z.string(),
+    bankAccount: z.string(),
+    countOrder: z.number(),
+    totalOrderValue: z.number(),
+    totalPrice: z.number(),
+    hotelPayment: z.number(),
+    commissionAmount: z.number(),
+    transferAmount: z.number(),
+  }),
+)
+
 export type GetOrdersQueryType = z.infer<typeof GetOrdersQuerySchema>
 export type GetOrdersResType = z.infer<typeof GetOrdersResSchema>
 
@@ -169,3 +210,6 @@ export type CreateOrderResType = z.infer<typeof CreateOrderResSchema>
 
 export type UpdateOrderBodyType = z.infer<typeof UpdateOrderBodySchema>
 export type UpdateOrderResType = z.infer<typeof UpdateOrderResSchema>
+
+export type ExportPartnerRevenueType = z.infer<typeof ExportPartnerRevenueSchema>
+export type ExportPartnerRevenueResType = z.infer<typeof ExportPartnerRevenueResSchema>

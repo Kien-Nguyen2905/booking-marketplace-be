@@ -3,7 +3,12 @@ import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
 import { addDays, addHours, eachDayOfInterval, format, isAfter, isBefore, isEqual, startOfDay, subDays } from 'date-fns'
 import { Server } from 'socket.io'
 import { OrderNotFoundException } from 'src/routes/order/order.error'
-import { GetOrdersQueryType, CreateOrderBodyType, GetOrdersByUserIdQueryType } from 'src/routes/order/order.model'
+import {
+  GetOrdersQueryType,
+  CreateOrderBodyType,
+  GetOrdersByUserIdQueryType,
+  ExportPartnerRevenueType,
+} from 'src/routes/order/order.model'
 import { OrderRepo } from 'src/routes/order/order.repo'
 import { EVENT } from 'src/shared/constants/event.constant'
 import { ORDER_STATUS, OrderStatusType } from 'src/shared/constants/order.constant'
@@ -394,5 +399,9 @@ export class OrderService {
       }
       throw error
     }
+  }
+
+  async exportPartnerRevenue({ dateFrom, dateTo }: ExportPartnerRevenueType) {
+    return await this.orderRepo.exportPartnerRevenue({ dateFrom, dateTo })
   }
 }

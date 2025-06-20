@@ -1,6 +1,8 @@
 import { createZodDto } from 'nestjs-zod'
 import {
   CreateOrderBodySchema,
+  ExportPartnerRevenueResSchema,
+  ExportPartnerRevenueSchema,
   GetOrderByIdResSchema,
   GetOrdersByUserIdQuerySchema,
   GetOrdersByUserIdResSchema,
@@ -25,3 +27,7 @@ export class GetOrdersByUserIdResDTO extends createZodDto(GetOrdersByUserIdResSc
 export class UpdateOrderBodyDTO extends createZodDto(UpdateOrderBodySchema) {}
 
 export class UpdateOrderResDTO extends createZodDto(UpdateOrderResSchema) {}
+
+export class ExportPartnerRevenueDTO extends createZodDto(ExportPartnerRevenueSchema) {}
+
+export class ExportPartnerRevenueResDTO extends createZodDto(ExportPartnerRevenueResSchema) {}

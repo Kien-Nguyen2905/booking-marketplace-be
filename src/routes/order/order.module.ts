@@ -14,6 +14,6 @@ import { ORDER_QUEUE_NAME } from 'src/shared/constants/queue.constant'
       name: ORDER_QUEUE_NAME,
     }),
   ],
-  exports: [OrderProducer],
+  exports: [OrderService, OrderProducer],
 })
 export class OrderModule {}

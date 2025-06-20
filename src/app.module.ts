@@ -32,10 +32,12 @@ import { PaymentModule } from './routes/payment/payment.module'
 import { TransactionModule } from './routes/transaction/transaction.module'
 import { RefundModule } from './routes/refund/refund.module'
 import { ReviewModule } from './routes/review/review.module'
+import { MetricModule } from './routes/metric/metric.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { RemoveRefreshTokenCronjob } from 'src/cronjobs/remove-refresh-token.cronjob'
 import { CheckoutOrderCronjob } from 'src/cronjobs/checkout-order.cronjobs'
 import { RemoveRoomAvailabilityCronjob } from 'src/cronjobs/remove-roomavailability.cronjobs'
+
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -67,6 +69,7 @@ import { RemoveRoomAvailabilityCronjob } from 'src/cronjobs/remove-roomavailabil
     TransactionModule,
     RefundModule,
     ReviewModule,
+    MetricModule,
   ],
   controllers: [AppController],
   providers: [
