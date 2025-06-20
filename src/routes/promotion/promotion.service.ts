@@ -11,6 +11,7 @@ import {
   PromotionIsActiveException,
   PromotionNotFoundException,
   PromotionRangeDateAlreadyExistsException,
+  PromotionUsedException,
 } from './promotion.error'
 import { isNotFoundPrismaError } from 'src/shared/helpers'
 import { format } from 'date-fns'
@@ -48,7 +49,9 @@ export class PromotionService {
       if (!currentPromotion) {
         throw PromotionNotFoundException
       }
-
+      if (currentPromotion.order.length > 0) {
+        throw PromotionUsedException
+      }
       const currentFromDate = format(new Date(currentPromotion.validFrom), 'yyyy-MM-dd')
       const currentToDate = format(new Date(currentPromotion.validUntil), 'yyyy-MM-dd')
       const currentDate = format(new Date(), 'yyyy-MM-dd')

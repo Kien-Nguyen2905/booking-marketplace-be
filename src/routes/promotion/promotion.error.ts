@@ -11,3 +11,5 @@ export const PromotionIsActiveException = new BadRequestException('Cannot update
 export const DeletePromotionIsActiveException = new BadRequestException('Cannot delete promotion active')
 
 export const PromotionExpiredException = new BadRequestException('Cannot update promotion expired')
+
+export const PromotionUsedException = new BadRequestException('Promotion has been used')

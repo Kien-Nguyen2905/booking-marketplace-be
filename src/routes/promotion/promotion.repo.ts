@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { endOfDay, format, isWithinInterval, parse, startOfDay } from 'date-fns'
+import { parse } from 'date-fns'
 import {
   CreatePromotionBodyType,
   GetPromotionsQueryType,
@@ -62,6 +62,9 @@ export class PromotionRepo {
       where: {
         id,
         deletedAt: null,
+      },
+      include: {
+        order: true,
       },
     })
   }
