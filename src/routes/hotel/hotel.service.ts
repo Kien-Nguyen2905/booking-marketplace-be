@@ -7,12 +7,27 @@ import {
   UpdateHotelAmenitiesBodyType,
   UpdateHotelBodyType,
 } from 'src/routes/hotel/hotel.model'
-import { HotelAlreadyExistsException, HotelAmenityAlreadyExistsException, HotelNotFoundException } from './hotel.error'
+import {
+  HotelAlreadyExistsException,
+  HotelAmenityAlreadyExistsException,
+  HotelNotFoundException,
+  HotelInOrderPendingException,
+} from './hotel.error'
 import { isUniqueConstraintPrismaError } from 'src/shared/helpers'
 
 @Injectable()
 export class HotelService {
   constructor(private hotelRepo: HotelRepo) {}
+
+  async checkHotelInOrderPending(id: number) {
+    const hotel = await this.hotelRepo.findHotelIncludeOrderPending(id)
+    if (!hotel) {
+      throw HotelNotFoundException
+    }
+    if (hotel?.order?.length > 0) {
+      throw HotelInOrderPendingException
+    }
+  }
 
   async list(query: GetHotelsQueryType) {
     return this.hotelRepo.list(query)
@@ -43,6 +58,7 @@ export class HotelService {
 
   async update({ data, id }: { data: UpdateHotelBodyType; id: number }) {
     try {
+      await this.checkHotelInOrderPending(id)
       return await this.hotelRepo.update({ data, id })
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {

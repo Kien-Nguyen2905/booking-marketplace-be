@@ -1,6 +1,5 @@
 export const NOTIFY_TYPE = {
   REFUND: 'REFUND',
-  DEMAND: 'DEMAND',
   INFORM: 'INFORM',
 } as const
 

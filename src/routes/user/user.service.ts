@@ -9,11 +9,17 @@ import {
 } from 'src/shared/helpers'
 import {
   CannotUpdateOrDeleteYourselfException,
+  CannotUpdateUserAdminException,
+  OrderPendingOrConfirmedException,
   RoleNotFoundException,
   UserAlreadyExistsException,
+  UserHasPendingOrConfirmedOrderInHotelException,
+  UserNotFoundException,
 } from 'src/routes/user/user.error'
 import { SharedUserRepository } from 'src/shared/repositories/shared-user.repo'
 import { HashingService } from 'src/shared/services/hashing.service'
+import { ROLE_NAME } from 'src/shared/constants/role.constant'
+import { RoleRepo } from 'src/routes/role/role.repo'
 
 @Injectable()
 export class UserService {
@@ -21,6 +27,7 @@ export class UserService {
     private userRepo: UserRepo,
     private hashingService: HashingService,
     private sharedUserRepository: SharedUserRepository,
+    private roleRepo: RoleRepo,
   ) {}
 
   async list({ limit, page, search, role, status }: GetUsersQueryType) {
@@ -66,12 +73,28 @@ export class UserService {
         userAgentId: updatedById,
         userTargetId: id,
       })
+      await this.checkRole(id)
+
+      const role = await this.roleRepo.findById(data.roleId)
+      if (!role) {
+        throw RoleNotFoundException
+      }
+
+      if (data.status === 'INACTIVE' && role.name === ROLE_NAME.PARTNER) {
+        await this.checkUserExistPendingAndConfirmOrder(id)
+        await this.checkUserExistPendingAndConfirmOrderInHotel(id)
+      }
+      if (data.status === 'INACTIVE' && role.name === ROLE_NAME.CUSTOMER) {
+        await this.checkUserExistPendingAndConfirmOrder(id)
+      }
+
       const updatedUser = await this.sharedUserRepository.update(
         { id },
         {
           ...data,
         },
       )
+
       return updatedUser
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
@@ -90,6 +113,36 @@ export class UserService {
   private verifyYourself({ userAgentId, userTargetId }: { userAgentId: number; userTargetId: number }) {
     if (userAgentId === userTargetId) {
       throw CannotUpdateOrDeleteYourselfException
+    }
+  }
+
+  private async checkRole(userId: number) {
+    const user = await this.sharedUserRepository.findUniqueIncludeRolePermissions({ id: userId })
+    if (!user) {
+      throw UserNotFoundException
+    }
+    if (user.role.name === ROLE_NAME.ADMIN) {
+      throw CannotUpdateUserAdminException
+    }
+  }
+
+  private async checkUserExistPendingAndConfirmOrder(userId: number) {
+    const user = await this.userRepo.findUserIncludePendingAndConfirmOrder(userId)
+    if (!user) {
+      throw UserNotFoundException
+    }
+    if (user?.order?.length > 0) {
+      throw OrderPendingOrConfirmedException
+    }
+  }
+
+  private async checkUserExistPendingAndConfirmOrderInHotel(userId: number) {
+    const user = await this.userRepo.findUserIncludeExistPendingAndConfirmOrderInHotel(userId)
+    if (!user) {
+      throw UserNotFoundException
+    }
+    if (user?.partner?.hotel?.order?.length || 0 > 0) {
+      throw UserHasPendingOrConfirmedOrderInHotelException
     }
   }
 }

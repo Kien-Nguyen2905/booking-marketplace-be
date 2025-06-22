@@ -359,16 +359,16 @@ model User {
   Device                          Device[]
   Notify_Notify_createdByIdToUser Notify[]       @relation("Notify_createdByIdToUser")
   Notify_Notify_recipientIdToUser Notify[]       @relation("Notify_recipientIdToUser")
-  Order                           Order[]
-  Partner                         Partner?
-  Promotion                       Promotion[]
-  RefreshToken                    RefreshToken[]
-  Refund                          Refund[]
-  Review                          Review[]
-  User                            User?          @relation("UserToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order                           Order[]
+  partner                         Partner?
+  promotion                       Promotion[]
+  refreshToken                    RefreshToken[]
+  refund                          Refund[]
+  review                          Review[]
+  user                            User?          @relation("UserToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
   other_User                      User[]         @relation("UserToUser")
   role                            Role           @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Wishlist                        Wishlist[]
+  wishlist                        Wishlist[]
 }
 
 model VerificationCode {
@@ -427,7 +427,6 @@ enum HotelType {
 
 enum NotifyType {
   REFUND
-  DEMAND
   INFORM
 }
 

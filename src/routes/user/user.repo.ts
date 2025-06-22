@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { CreateUserBodyType, GetUsersQueryType } from 'src/routes/user/user.model'
 import { UserStatusType } from 'src/shared/constants/auth.constant'
+import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
 @Injectable()
@@ -68,6 +69,44 @@ export class UserRepo {
         id: userId,
       },
       data,
+    })
+  }
+
+  async findUserIncludePendingAndConfirmOrder(id: number) {
+    return await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        order: {
+          where: {
+            OR: [{ status: ORDER_STATUS.PENDING }, { status: ORDER_STATUS.CONFIRMED }],
+          },
+        },
+      },
+    })
+  }
+
+  async findUserIncludeExistPendingAndConfirmOrderInHotel(id: number) {
+    return await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        partner: {
+          include: {
+            hotel: {
+              include: {
+                order: {
+                  where: {
+                    OR: [{ status: ORDER_STATUS.PENDING }, { status: ORDER_STATUS.CONFIRMED }],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
   }
 }

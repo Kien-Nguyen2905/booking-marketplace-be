@@ -7,7 +7,8 @@ import {
   UpdateHotelAmenitiesBodyType,
   UpdateHotelBodyType,
 } from 'src/routes/hotel/hotel.model'
-import { HotelStatusType, HotelTypeType } from 'src/shared/constants/hotel.constant'
+import { HotelStatus, HotelStatusType, HotelTypeType } from 'src/shared/constants/hotel.constant'
+import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { S3Service } from 'src/shared/services/s3.service'
 
@@ -213,6 +214,9 @@ export class HotelRepo {
             room: {
               some: {
                 deletedAt: null, // Chỉ lấy room chưa bị xóa
+                quantity: {
+                  gte: 1,
+                },
               },
             },
           },
@@ -222,6 +226,9 @@ export class HotelRepo {
         room: {
           where: {
             deletedAt: null,
+            quantity: {
+              gte: 1,
+            },
           },
           include: {
             roomType: true,
@@ -292,13 +299,7 @@ export class HotelRepo {
     amenity?: string // Ví dụ: '1' hoặc '1,2,3'
     orderBy?: string // 'rating', 'reputationScore', 'price'
     order?: 'asc' | 'desc' // Thứ tự sắp xếp
-  }): Promise<{
-    data: any[]
-    totalItems: number
-    page: number
-    limit: number
-    totalPages: number
-  }> {
+  }) {
     const {
       province,
       start,
@@ -343,7 +344,7 @@ export class HotelRepo {
     const hotels = await this.prismaService.hotel.findMany({
       where: {
         provinceCode: province,
-        status: 'ACTIVE',
+        status: HotelStatus.ACTIVE,
         ...(rating ? { rating: { equals: Number(rating) } } : {}),
         ...(type ? { type: type.toUpperCase() as HotelTypeType } : {}),
         ...(amenityArray.length > 0
@@ -363,6 +364,7 @@ export class HotelRepo {
             room: {
               some: {
                 deletedAt: null,
+                quantity: { gte: available },
               },
             },
           },
@@ -384,6 +386,7 @@ export class HotelRepo {
             room: {
               where: {
                 deletedAt: null,
+                quantity: { gte: available },
               },
               include: {
                 roomAvailability: {
@@ -494,5 +497,20 @@ export class HotelRepo {
       limit,
       totalPages,
     }
+  }
+
+  async findHotelIncludeOrderPending(id: number) {
+    return await this.prismaService.hotel.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        order: {
+          where: {
+            status: ORDER_STATUS.PENDING,
+          },
+        },
+      },
+    })
   }
 }

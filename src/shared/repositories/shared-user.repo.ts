@@ -21,7 +21,10 @@ export class SharedUserRepository {
       where: {
         ...where,
       },
-      data,
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
     })
   }
 
