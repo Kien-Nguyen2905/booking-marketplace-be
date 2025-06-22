@@ -58,6 +58,12 @@ export const UpdatePartnerStatusBodySchema = PartnerSchema.pick({
 
 export const UpdatePartnerStatusResSchema = PartnerSchema
 
+export const UpdatePartnerByAdminBodySchema = UpdatePartnerBodySchema.omit({
+  code: true,
+})
+
+export const UpdatePartnerByAdminResSchema = PartnerSchema
+
 export type GetPartnerByUserIdResType = z.infer<typeof GetPartnerByUserIdResSchema>
 export type GetPartnersResType = z.infer<typeof GetPartnersResSchema>
 export type GetPartnersQueryType = z.infer<typeof GetPartnersQuerySchema>
@@ -68,3 +74,5 @@ export type UpdatePartnerResType = z.infer<typeof UpdatePartnerResSchema>
 export type UpdatePartnerStatusBodyType = z.infer<typeof UpdatePartnerStatusBodySchema>
 export type UpdatePartnerStatusResType = z.infer<typeof UpdatePartnerStatusResSchema>
 export type GetPartnerByIdResType = z.infer<typeof GetPartnerByIdResSchema>
+export type UpdatePartnerByAdminBodyType = z.infer<typeof UpdatePartnerByAdminBodySchema>
+export type UpdatePartnerByAdminResType = z.infer<typeof UpdatePartnerByAdminResSchema>

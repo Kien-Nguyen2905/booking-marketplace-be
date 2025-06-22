@@ -4,6 +4,7 @@ import {
   CreatePartnerBodyType,
   GetPartnersQueryType,
   UpdatePartnerBodyType,
+  UpdatePartnerByAdminBodyType,
   UpdatePartnerStatusBodyType,
 } from 'src/routes/partner/partner.model'
 import {
@@ -148,5 +149,16 @@ export class PartnerService {
     }
 
     return result
+  }
+
+  async updatePartnerByAdmin({ data, partnerId }: { data: UpdatePartnerByAdminBodyType; partnerId: number }) {
+    try {
+      return await this.partnerRepo.updateByAdmin({ data, partnerId })
+    } catch (error) {
+      if (isUniqueConstraintPrismaError(error)) {
+        throw PartnerAlreadyExistsException
+      }
+      throw error
+    }
   }
 }

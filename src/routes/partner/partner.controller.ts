@@ -8,6 +8,8 @@ import {
   GetPartnersQueryDTO,
   GetPartnersResDTO,
   UpdatePartnerBodyDTO,
+  UpdatePartnerByAdminBodyDTO,
+  UpdatePartnerByAdminResDTO,
   UpdatePartnerResDTO,
   UpdatePartnerStatusBodyDTO,
   UpdatePartnerStatusResDTO,
@@ -53,5 +55,11 @@ export class PartnerController {
   @ZodSerializerDto(UpdatePartnerStatusResDTO)
   async updatePartnerStatus(@Body() body: UpdatePartnerStatusBodyDTO, @ActiveUser('userId') adminId: number) {
     return this.partnerService.updatePartnerStatus({ data: body, partnerId: body.userId, createdById: adminId })
+  }
+
+  @Put('admin/:partnerId')
+  @ZodSerializerDto(UpdatePartnerByAdminResDTO)
+  async updatePartnerByAdmin(@Body() body: UpdatePartnerByAdminBodyDTO, @Param('partnerId') partnerId: string) {
+    return this.partnerService.updatePartnerByAdmin({ data: body, partnerId: +partnerId })
   }
 }

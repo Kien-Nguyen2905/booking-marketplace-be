@@ -3,6 +3,7 @@ import {
   CreatePartnerBodyType,
   GetPartnersQueryType,
   UpdatePartnerBodyType,
+  UpdatePartnerByAdminBodyType,
   UpdatePartnerStatusBodyType,
 } from 'src/routes/partner/partner.model'
 import { HotelStatus } from 'src/shared/constants/hotel.constant'
@@ -162,5 +163,17 @@ export class PartnerRepo {
       return partner
     }
     return null
+  }
+
+  async updateByAdmin({ data, partnerId }: { data: UpdatePartnerByAdminBodyType; partnerId: number }) {
+    return await this.prismaService.partner.update({
+      where: {
+        id: partnerId,
+      },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    })
   }
 }

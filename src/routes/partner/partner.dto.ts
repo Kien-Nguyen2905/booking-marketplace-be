@@ -7,9 +7,11 @@ import {
   GetPartnersQuerySchema,
   GetPartnersResSchema,
   UpdatePartnerBodySchema,
+  UpdatePartnerByAdminBodySchema,
   UpdatePartnerResSchema,
   UpdatePartnerStatusBodySchema,
   UpdatePartnerStatusResSchema,
+  UpdatePartnerByAdminResSchema,
 } from 'src/routes/partner/partner.model'
 
 export class GetPartnerByUserIdResDTO extends createZodDto(GetPartnerByUserIdResSchema) {}
@@ -22,3 +24,5 @@ export class UpdatePartnerResDTO extends createZodDto(UpdatePartnerResSchema) {}
 export class UpdatePartnerStatusBodyDTO extends createZodDto(UpdatePartnerStatusBodySchema) {}
 export class UpdatePartnerStatusResDTO extends createZodDto(UpdatePartnerStatusResSchema) {}
 export class GetPartnerByIdResDTO extends createZodDto(GetPartnerByIdResSchema) {}
+export class UpdatePartnerByAdminBodyDTO extends createZodDto(UpdatePartnerByAdminBodySchema) {}
+export class UpdatePartnerByAdminResDTO extends createZodDto(UpdatePartnerByAdminResSchema) {}
