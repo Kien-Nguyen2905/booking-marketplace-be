@@ -10,6 +10,7 @@ import {
 } from 'src/routes/room-type/room-type.model'
 import {
   RoomTypeAlreadyHasRoomException,
+  RoomTypeInOrderException,
   RoomTypeNotFoundException,
   TypeAlreadyExistsException,
 } from './room-type.error'
@@ -23,6 +24,13 @@ export class RoomTypeService {
     private roomTypeRepo: RoomTypeRepo,
     private roomRepo: RoomRepo,
   ) {}
+
+  async checkRoomTypeInOrder(roomTypeId: number) {
+    const roomType = await this.roomTypeRepo.findRoomIncludePendingOrConfirmedOrder(roomTypeId)
+    if (roomType) {
+      throw RoomTypeInOrderException
+    }
+  }
 
   async getRoomTypeById(roomTypeId: number) {
     return await this.roomTypeRepo.findById(roomTypeId)
@@ -55,6 +63,7 @@ export class RoomTypeService {
 
   async update(data: UpdateRoomTypeBodyType & { id: number }) {
     try {
+      await this.checkRoomTypeInOrder(data.id)
       return await this.roomTypeRepo.update(data)
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
@@ -69,6 +78,7 @@ export class RoomTypeService {
     if (rooms?.length > 0) {
       throw RoomTypeAlreadyHasRoomException
     }
+    await this.checkRoomTypeInOrder(id)
     await this.checkRoomTypeExist(id)
     return await this.roomTypeRepo.delete(id)
   }

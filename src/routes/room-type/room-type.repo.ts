@@ -7,6 +7,7 @@ import {
   UpdateRoomTypeAmenitiesBodyType,
   UpdateRoomTypeBodyType,
 } from 'src/routes/room-type/room-type.model'
+import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { S3Service } from 'src/shared/services/s3.service'
 
@@ -184,6 +185,22 @@ export class RoomTypeRepo {
         },
       })
       return amenities.map((amenity) => amenity.amenity)
+    })
+  }
+
+  async findRoomIncludePendingOrConfirmedOrder(roomTypeId: number) {
+    return await this.prismaService.room.findFirst({
+      where: {
+        roomTypeId,
+        deletedAt: null,
+        order: {
+          some: {
+            status: {
+              in: [ORDER_STATUS.PENDING, ORDER_STATUS.CONFIRMED],
+            },
+          },
+        },
+      },
     })
   }
 }

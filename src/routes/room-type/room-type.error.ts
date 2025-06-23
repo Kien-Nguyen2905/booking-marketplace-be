@@ -9,3 +9,5 @@ export const TypeAlreadyExistsException = new UnprocessableEntityException([
     path: 'type',
   },
 ])
+
+export const RoomTypeInOrderException = new BadRequestException('Room type is in pending or confirmed order')
