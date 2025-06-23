@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { eachDayOfInterval, isValid, parse } from 'date-fns'
+import { eachDayOfInterval, parse, subDays } from 'date-fns'
 import {
   CreateHotelAmenitiesBodyType,
   CreateHotelBodyType,
@@ -9,6 +9,7 @@ import {
 } from 'src/routes/hotel/hotel.model'
 import { HotelStatus, HotelStatusType, HotelTypeType } from 'src/shared/constants/hotel.constant'
 import { ORDER_STATUS } from 'src/shared/constants/order.constant'
+import { toStartOfUTCDate } from 'src/shared/helpers'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { S3Service } from 'src/shared/services/s3.service'
 
@@ -296,7 +297,6 @@ export class HotelRepo {
     limit: number
     rating?: number
     type?: string
-    amenity?: string // Ví dụ: '1' hoặc '1,2,3'
     orderBy?: string // 'rating', 'reputationScore', 'price'
     order?: 'asc' | 'desc' // Thứ tự sắp xếp
   }) {
@@ -311,51 +311,34 @@ export class HotelRepo {
       limit,
       rating,
       type,
-      amenity,
       orderBy = 'reputationScore',
       order = 'desc',
     } = query
-    // Tính skip và take cho phân trang
     const skip = (page - 1) * limit
     const take = limit
 
-    // Chuyển đổi ngày từ DD-MM-YYYY sang Date
-    const startDate = parse(start, 'dd-MM-yyyy', new Date())
-    const endDate = parse(end, 'dd-MM-yyyy', new Date())
+    // Chuyển đổi chuỗi ngày từ DD-MM-YYYY sang Date
+    const startDateParsed = parse(start, 'dd-MM-yyyy', new Date())
+    const endDateParsed = parse(end, 'dd-MM-yyyy', new Date())
+    const startDate = toStartOfUTCDate(startDateParsed)
+    const endDate = toStartOfUTCDate(endDateParsed)
 
-    if (!isValid(startDate) || !isValid(endDate) || startDate >= endDate) {
-      throw new Error('Invalid date range')
-    }
+    const dateRange = eachDayOfInterval({
+      start: startDate,
+      end: subDays(endDate, 1),
+    })
 
-    // Lấy tất cả các ngày trong khoảng thời gian
-    const dateRange = eachDayOfInterval({ start: startDate, end: endDate })
-
-    // Kiểm tra tính hợp lệ của orderBy
+    // Validate orderBy
     const validOrderByFields = ['rating', 'reputationScore', 'createdAt', 'price']
     const finalOrderBy = validOrderByFields.includes(orderBy) ? orderBy : 'reputationScore'
-    const amenityArray = amenity
-      ? amenity
-          .split(',')
-          .map(Number)
-          .filter((n) => !isNaN(n))
-      : []
 
-    // Truy vấn khách sạn (bỏ skip và take để lấy toàn bộ)
+    // Truy vấn hotel (bỏ skip và take để lấy toàn bộ)
     const hotels = await this.prismaService.hotel.findMany({
       where: {
         provinceCode: province,
         status: HotelStatus.ACTIVE,
         ...(rating ? { rating: { equals: Number(rating) } } : {}),
         ...(type ? { type: type.toUpperCase() as HotelTypeType } : {}),
-        ...(amenityArray.length > 0
-          ? {
-              hotelAmenity: {
-                some: {
-                  amenityId: { in: amenityArray },
-                },
-              },
-            }
-          : {}),
         roomType: {
           some: {
             deletedAt: null,
@@ -393,7 +376,7 @@ export class HotelRepo {
                   where: {
                     createdAt: {
                       gte: startDate,
-                      lte: endDate,
+                      lt: endDate,
                     },
                   },
                 },
@@ -405,6 +388,12 @@ export class HotelRepo {
         room: {
           where: {
             deletedAt: null,
+            quantity: { gte: available },
+            roomType: {
+              deletedAt: null,
+              adults: { gte: adult },
+              child: child === 0 ? undefined : { gte: child },
+            },
           },
           include: {
             roomType: {
@@ -440,10 +429,10 @@ export class HotelRepo {
       return true
     }
 
-    // Hàm lọc các roomType
     const filterRoomTypes = (roomType: any, dateRange: Date[], available: number): any | null => {
-      // Sử dụng find để lấy phòng đầu tiên thỏa mãn
+      // Sử dụng find để lấy phòng đầu tiên thỏa mãn trong số tất cả phòng thuộc roomType
       const firstAvailableRoom = roomType.room.find((room: any) => isRoomAvailable(room, dateRange, available))
+      // Nếu không có phòng thỏa mãn, trả về null
       if (!firstAvailableRoom) return null
       return {
         ...roomType,
@@ -451,10 +440,10 @@ export class HotelRepo {
       }
     }
 
-    // Hàm lọc các khách sạn
     const filterHotels = (hotel: any, dateRange: Date[], available: number): any | null => {
       const filteredRoomTypes = hotel.roomType
         .map((roomType: any) => filterRoomTypes(roomType, dateRange, available))
+        // Loại bỏ các roomType trả về null
         .filter((roomType: any) => roomType !== null)
       if (filteredRoomTypes.length === 0) return null
       return {
@@ -463,29 +452,22 @@ export class HotelRepo {
       }
     }
 
-    // Lọc khách sạn dựa trên số phòng trống
+    // Lọc hotel dựa theo khoảng ngày và số phòng trống
     let filteredHotels = hotels
       .map((hotel) => filterHotels(hotel, dateRange, available))
+      // Loại bỏ các hotel trả về null
       .filter((hotel) => hotel !== null)
-
-    // Post-processing: Filter hotels that have all required amenities
-    if (amenityArray.length > 0) {
-      filteredHotels = filteredHotels.filter((hotel) => {
-        const hotelAmenityIds = hotel.hotelAmenity.map((item) => item.amenity.id)
-        return amenityArray.every((amenityId) => hotelAmenityIds.includes(Number(amenityId)))
-      })
-    }
 
     //  orderBy là 'price' follow the price of the first room
     if (finalOrderBy === 'price') {
       filteredHotels.sort((a, b) => {
-        const aPrice = a.roomType[0]?.room[0]?.price ?? Infinity
-        const bPrice = b.roomType[0]?.room[0]?.price ?? Infinity
+        const aPrice = a.room[0]?.price ?? Infinity
+        const bPrice = b.room[0]?.price ?? Infinity
         return order === 'asc' ? aPrice - bPrice : bPrice - aPrice
       })
     }
 
-    // Tính totalItems và totalPages
+    // totalItems và totalPages
     const totalItems = filteredHotels.length
     const totalPages = Math.ceil(totalItems / limit)
     const paginatedHotels = filteredHotels.slice(skip, skip + take)

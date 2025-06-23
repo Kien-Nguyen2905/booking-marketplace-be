@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { eachDayOfInterval, format, isValid, parse } from 'date-fns'
+import { eachDayOfInterval, format, parse, subDays } from 'date-fns'
 import { RoomNotFoundException } from 'src/routes/room/room.error'
 import { CreateRoomBodyType } from 'src/routes/room/room.model'
 import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { POLICY_TYPE, PolicyType } from 'src/shared/constants/room.constant'
+import { toStartOfUTCDate } from 'src/shared/helpers'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
 @Injectable()
@@ -157,16 +158,12 @@ export class RoomRepo {
   }
 
   async findAvailableRoomsByRoomId(roomId: number, start: string, end: string) {
-    // Chuyển đổi chuỗi ngày sang Date ISO string
-    const startDate = parse(start, 'dd-MM-yyyy', new Date())
-    const endDate = parse(end, 'dd-MM-yyyy', new Date())
+    // Chuyển đổi ngày từ DD-MM-YYYY sang Date
+    const startDateParsed = parse(start, 'dd-MM-yyyy', new Date())
+    const endDateParsed = parse(end, 'dd-MM-yyyy', new Date())
+    const startDate = toStartOfUTCDate(startDateParsed)
+    const endDate = toStartOfUTCDate(endDateParsed)
 
-    // Kiểm tra tính hợp lệ của ngày
-    if (!isValid(startDate) || !isValid(endDate) || startDate > endDate) {
-      throw new Error('Invalid date range')
-    }
-
-    // Lấy thông tin phòng từ database
     const room = await this.prismaService.room.findUnique({
       where: { id: roomId, deletedAt: null },
     })
@@ -174,15 +171,18 @@ export class RoomRepo {
     if (!room) {
       throw RoomNotFoundException
     }
-    // Lấy danh sách tất cả các ngày trong khoảng thời gian
-    const dateRange = eachDayOfInterval({ start: startDate, end: endDate })
-    // Lấy dữ liệu RoomAvailability trong khoảng thời gian
+
+    const dateRange = eachDayOfInterval({
+      start: startDate,
+      end: subDays(endDate, 1),
+    })
+
     const roomAvailabilities = await this.prismaService.roomAvailability.findMany({
       where: {
         roomId,
         createdAt: {
           gte: startDate,
-          lte: endDate,
+          lt: endDate,
         },
       },
       select: {
@@ -190,6 +190,7 @@ export class RoomRepo {
         availableRooms: true,
       },
     })
+
     // Tạo map từ ngày sang số phòng trống
     const availabilityMap = new Map<string, number>()
 
