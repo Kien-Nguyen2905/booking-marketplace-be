@@ -83,7 +83,10 @@ export class OrderRepo {
     }
   }
 
-  async findOrdersByUserId({ limit, page, dateFrom, dateTo }: GetOrdersByUserIdQueryType, userId: number) {
+  async findOrdersByUserId(
+    { limit, page, dateFrom, dateTo, status, paymentType }: GetOrdersByUserIdQueryType,
+    userId: number,
+  ) {
     const skip = (page - 1) * limit
     const take = limit
 
@@ -96,6 +99,12 @@ export class OrderRepo {
     } else if (dateFrom) {
       // Nếu chỉ có dateFrom
       where.checkinDate = { equals: dateFrom }
+    }
+    if (status) {
+      where.status = status.toUpperCase() as OrderStatusType
+    }
+    if (paymentType) {
+      where.paymentType = paymentType.toUpperCase() as PaymentType
     }
 
     const [totalItems, data] = await Promise.all([

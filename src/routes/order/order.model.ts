@@ -77,6 +77,8 @@ export const GetOrdersByUserIdQuerySchema = z
         // default convert local to UTC
         return toStartOfUTCDate(parsed) // đưa về 2025-06-07T00:00:00.000Z
       }),
+    status: z.string().optional(),
+    paymentType: z.string().optional(),
   })
   .strict()
 
