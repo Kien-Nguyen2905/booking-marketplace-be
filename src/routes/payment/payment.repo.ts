@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { format, parse } from 'date-fns'
 import { WebhookPaymentBodyType } from 'src/routes/payment/payment.model'
-import { NOTIFY_TYPE } from 'src/shared/constants/notify.constant'
 import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { PAYMENT_TYPE } from 'src/shared/constants/payment.constant'
 import { REFUND_STATUS } from 'src/shared/constants/refund.constant'
@@ -113,7 +112,6 @@ export class PaymentRepo {
           data: {
             recipientId: order.hotel.partner.userId,
             title: `New Booking: #${order.id}`,
-            type: NOTIFY_TYPE.INFORM,
             message: `Guest: "${order.customer.fullName}" booked ${order.quantity} room(s) from ${format(order.checkinDate, 'dd-MM-yyyy')} to ${format(order.checkoutDate, 'dd-MM-yyyy')}`,
           },
         })

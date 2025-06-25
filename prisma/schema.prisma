@@ -101,7 +101,6 @@ model Notify {
   id                            Int        @id @default(autoincrement())
   recipientId                   Int?
   title                         String     @db.VarChar(100)
-  type                          NotifyType
   message                       String
   createdById                   Int?
   readAt                        DateTime?  @db.Timestamp(6)
@@ -423,11 +422,6 @@ enum HotelType {
   HOME_STAY
   VILLA
   RESORT
-}
-
-enum NotifyType {
-  REFUND
-  INFORM
 }
 
 enum OrderStatus {

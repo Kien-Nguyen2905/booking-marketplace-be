@@ -6,7 +6,6 @@ import { WebSocketServer } from '@nestjs/websockets'
 import { Server } from 'socket.io'
 import { EVENT } from 'src/shared/constants/event.constant'
 import { WebSocketGateway } from '@nestjs/websockets'
-import { NOTIFY_TYPE } from 'src/shared/constants/notify.constant'
 
 @Injectable()
 @WebSocketGateway({ namespace: '' })

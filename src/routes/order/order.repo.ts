@@ -13,7 +13,6 @@ import {
 import { PromotionNotFoundException } from 'src/routes/promotion/promotion.error'
 import { RoomNotFoundException } from 'src/routes/room/room.error'
 import { HotelStatus } from 'src/shared/constants/hotel.constant'
-import { NOTIFY_TYPE } from 'src/shared/constants/notify.constant'
 import { ORDER_STATUS, OrderStatusType } from 'src/shared/constants/order.constant'
 import { PAYMENT_TYPE } from 'src/shared/constants/payment.constant'
 import { toStartOfUTCDate } from 'src/shared/helpers'
@@ -363,7 +362,6 @@ export class OrderRepo {
           data: {
             recipientId: hotel.partner.userId,
             title: `New Booking: #${order.id}`,
-            type: NOTIFY_TYPE.INFORM,
             message: `Guest: "${fullName}" booked ${quantity} room(s) from ${format(checkinDate, 'dd-MM-yyyy')} to ${format(checkoutDate, 'dd-MM-yyyy')}`,
           },
         })
@@ -632,7 +630,6 @@ export class OrderRepo {
       await this.prismaService.notify.create({
         data: {
           title: `Order ID: #${order.id} request refund from partner`,
-          type: NOTIFY_TYPE.REFUND,
           message: `Order ID: #${order.id} has already been request refund for guest: ${order.customer.fullName} with phone number: ${order.customer.phoneNumber} from partner ${order.hotel.partner.fullName}`,
           createdById: order.hotel.partner.userId,
         },
@@ -706,7 +703,6 @@ export class OrderRepo {
         data: {
           recipientId: order.hotel.partner.userId,
           title: `Order ID: #${order.id} have been canceled`,
-          type: NOTIFY_TYPE.INFORM,
           message: `Order ID: #${order.id} has already been canceled by user`,
           createdById: userId,
         },
@@ -780,7 +776,6 @@ export class OrderRepo {
         data: {
           recipientId: order.hotel.partner.userId,
           title: `Order ID: #${order.id} have been canceled`,
-          type: NOTIFY_TYPE.INFORM,
           message: `Order ID: #${order.id} has already been canceled by user`,
           createdById: userId,
         },
@@ -788,7 +783,6 @@ export class OrderRepo {
       await this.prismaService.notify.create({
         data: {
           title: `Order ID: #${order.id} request refund from user`,
-          type: NOTIFY_TYPE.REFUND,
           message: `Order ID: #${order.id} has already been request refund by user ID: #${userId}`,
           createdById: userId,
         },
