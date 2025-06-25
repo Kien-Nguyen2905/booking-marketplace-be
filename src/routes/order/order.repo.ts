@@ -554,15 +554,6 @@ export class OrderRepo {
         })
       }
 
-      await this.prismaService.notify.create({
-        data: {
-          title: `Order ID: #${order.id} is no show`,
-          type: NOTIFY_TYPE.INFORM,
-          message: `Order ID: #${order.id} have already been updated to no show for guest: ${order.customer.fullName} with phone number: ${order.customer.phoneNumber}`,
-          createdById: order.hotel.partner.userId,
-        },
-      })
-
       return order
     })
     return order

@@ -345,7 +345,6 @@ export class OrderService {
           customerName: order.customer.fullName,
           orderId: order.id,
         })
-        this.server.to(generateRoomAdmin()).emit(EVENT.NOTIFY, order)
         return order
       }
     } catch (error) {
