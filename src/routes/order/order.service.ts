@@ -1,6 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
-import { addDays, addHours, eachDayOfInterval, format, isAfter, isBefore, isEqual, startOfDay, subDays } from 'date-fns'
+import {
+  addDays,
+  addHours,
+  eachDayOfInterval,
+  format,
+  isAfter,
+  isBefore,
+  isEqual,
+  startOfDay,
+  subDays,
+  subHours,
+} from 'date-fns'
 import { Server } from 'socket.io'
 import { OrderNotFoundException } from 'src/routes/order/order.error'
 import {
@@ -43,19 +54,18 @@ export class OrderService {
       throw new BadRequestException('Only confirmed orders can be checked out')
     }
 
-    const checkinDate = addHours(order.checkinDate, 7)
-    const checkoutDate = addHours(order.checkoutDate, 7)
+    const checkinDate = subHours(order.checkinDate, 7)
+    const checkoutDate = subHours(order.checkoutDate, 7)
 
     const nowUTC7 = getNowUTC7()
-
     const today = startOfDay(nowUTC7)
 
     if (isBefore(checkoutDate, today)) {
       throw new BadRequestException('Cannot checkout past orders')
     }
 
-    if (isBefore(today, checkinDate)) {
-      throw new BadRequestException(`Cannot check out before ${format(checkinDate, 'dd/MM/yyyy')}`)
+    if (today.getTime() <= checkinDate.getTime()) {
+      throw new BadRequestException(`Cannot check out before ${format(addDays(checkinDate, 1), 'dd/MM/yyyy')}`)
     }
 
     return true
@@ -224,6 +234,15 @@ export class OrderService {
     if (order.status !== ORDER_STATUS.CONFIRMED) {
       throw new BadRequestException('Only confirmed orders can be canceled')
     }
+    const checkoutDate = addHours(order.checkoutDate, 7)
+
+    const nowUTC7 = getNowUTC7()
+
+    const today = startOfDay(nowUTC7)
+
+    if (isBefore(checkoutDate, today)) {
+      throw new BadRequestException('Cannot cancel past orders')
+    }
     return true
   }
 
@@ -304,15 +323,15 @@ export class OrderService {
     try {
       if (status === ORDER_STATUS.CHECKOUT) {
         await this.canCheckout(orderId)
-        const order = await this.orderRepo.updateStatusCheckout(orderId)
-        await this.mailProducer.sendCheckoutSuccessMail({
-          email: order.customer.email,
-          customerName: order.customer.fullName,
-          orderId: order.id,
-          hotelName: order.hotel.name,
-        })
+        // const order = await this.orderRepo.updateStatusCheckout(orderId)
+        // await this.mailProducer.sendCheckoutSuccessMail({
+        //   email: order.customer.email,
+        //   customerName: order.customer.fullName,
+        //   orderId: order.id,
+        //   hotelName: order.hotel.name,
+        // })
 
-        return order
+        // return order
       }
       if (status === ORDER_STATUS.CANCELED) {
         await this.canCancel(orderId)
