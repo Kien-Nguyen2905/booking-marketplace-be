@@ -12,6 +12,6 @@ export const PromotionExpiredException = new BadRequestException('Promotion is e
 
 export const PromotionUsedException = new BadRequestException('Promotion has been used')
 
-export const PromotionInPendingException = new BadRequestException('Promotion has been used')
+export const PromotionInPendingException = new BadRequestException('Promotion is in pending order')
 
 export const PromotionAlreadyNotifyException = new BadRequestException('Promotion has been notified')

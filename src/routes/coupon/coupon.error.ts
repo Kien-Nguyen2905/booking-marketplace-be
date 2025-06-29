@@ -7,3 +7,5 @@ export const CouponAlreadyExistsException = new UnprocessableEntityException([
 export const CouponNotFoundException = new BadRequestException('Coupon not found')
 
 export const CouponUsedException = new BadRequestException('Coupon has been used')
+
+export const CouponInPendingException = new BadRequestException('Coupon is in pending order')

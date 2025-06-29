@@ -4,6 +4,7 @@ import { CreateCouponBodyType, GetCouponsQueryType, UpdateCouponBodyType } from 
 import { isNotFoundPrismaError, isUniqueConstraintPrismaError } from 'src/shared/helpers'
 import {
   CouponAlreadyExistsException,
+  CouponInPendingException,
   CouponNotFoundException,
   CouponUsedException,
 } from 'src/routes/coupon/coupon.error'
@@ -21,6 +22,13 @@ export class CouponService {
       throw CouponUsedException
     }
     return coupon
+  }
+
+  async checkCouponInPendingOrder(id: number) {
+    const coupon = await this.couponRepo.findCouponInPendingOrder(id)
+    if (coupon) {
+      throw CouponInPendingException
+    }
   }
 
   async find(id: number) {
@@ -64,6 +72,7 @@ export class CouponService {
 
   async delete(id: number) {
     try {
+      await this.checkCouponInPendingOrder(id)
       return await this.couponRepo.delete(id)
     } catch (error) {
       if (isNotFoundPrismaError(error)) {

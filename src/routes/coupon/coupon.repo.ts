@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { CreateCouponBodyType, UpdateCouponBodyType } from 'src/routes/coupon/coupon.model'
+import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { generateCouponCode } from 'src/shared/helpers'
 
 import { PrismaService } from 'src/shared/services/prisma.service'
@@ -119,6 +120,20 @@ export class CouponRepo {
         deletedAt: null,
         available: {
           gt: 0,
+        },
+      },
+    })
+  }
+
+  async findCouponInPendingOrder(id: number) {
+    return await this.prismaService.coupon.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        order: {
+          some: {
+            status: ORDER_STATUS.PENDING,
+          },
         },
       },
     })

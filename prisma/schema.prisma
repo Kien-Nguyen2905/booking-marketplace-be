@@ -32,7 +32,7 @@ model Coupon {
   createdAt                     DateTime?     @default(now()) @db.Timestamp(6)
   updatedAt                     DateTime?     @default(now()) @db.Timestamp(6)
   User_Coupon_createdByIdToUser User?         @relation("Coupon_createdByIdToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Order                         Order[]
+  order                         Order[]
 }
 
 model Customer {
