@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { CreateNotifyBodyType, GetNotifiesByRecipientIdQueryType } from 'src/routes/notify/notify.model'
-import { PartnerStatus } from 'src/shared/constants/partner.constant'
 import { ROLE_NAME } from 'src/shared/constants/role.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
@@ -75,25 +74,5 @@ export class NotifyRepo {
         readAt: new Date(),
       },
     })
-  }
-
-  async createMultiplePartner({ data, createdById }: { data: CreateNotifyBodyType; createdById: number }) {
-    const partnerIds = await this.prismaService.partner.findMany({
-      where: {
-        status: PartnerStatus.ACCEPTED,
-      },
-      select: {
-        userId: true,
-      },
-    })
-    const notify = await this.prismaService.notify.createMany({
-      data: partnerIds.map((partner) => ({
-        ...data,
-        createdById,
-        createdAt: new Date(),
-        recipientId: partner.userId,
-      })),
-    })
-    return notify
   }
 }

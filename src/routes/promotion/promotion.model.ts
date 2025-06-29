@@ -1,5 +1,6 @@
 import { parse } from 'date-fns'
 import { toStartOfUTCDate } from 'src/shared/helpers'
+import { NotifySchema } from 'src/shared/models/shared-notify.model'
 import { PromotionSchema } from 'src/shared/models/shared-promotion.model'
 import { z } from 'zod'
 
@@ -78,6 +79,19 @@ export const UpdatePromotionResSchema = PromotionSchema
 
 export const DeletePromotionResSchema = PromotionSchema
 
+export const CreateNotifyPromotionBodySchema = NotifySchema.omit({
+  id: true,
+  createdAt: true,
+  createdById: true,
+  readAt: true,
+})
+  .extend({
+    promotionId: z.number(),
+  })
+  .strict()
+
+export const CreateNotifyPromotionResSchema = NotifySchema
+
 export type GetPromotionResType = z.infer<typeof GetPromotionResSchema>
 
 export type GetPromotionsResType = z.infer<typeof GetPromotionsResSchema>
@@ -93,3 +107,6 @@ export type UpdatePromotionResType = z.infer<typeof UpdatePromotionResSchema>
 export type DeletePromotionResType = z.infer<typeof DeletePromotionResSchema>
 
 export type GetPromotionByValidFromResType = z.infer<typeof GetPromotionByValidFromResSchema>
+
+export type CreateNotifyPromotionBodyType = z.infer<typeof CreateNotifyPromotionBodySchema>
+export type CreateNotifyPromotionResType = z.infer<typeof CreateNotifyPromotionResSchema>

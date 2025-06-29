@@ -1,6 +1,5 @@
 import { createZodDto } from 'nestjs-zod'
 import {
-  CreateMultipleNotifyBodySchema,
   CreateNotifyBodySchema,
   CreateNotifyResSchema,
   GetNotifiesByRecipientIdResSchema,
@@ -9,8 +8,6 @@ import {
 
 export class CreateNotifyResDTO extends createZodDto(CreateNotifyResSchema) {}
 export class CreateNotifyBodyDTO extends createZodDto(CreateNotifyBodySchema) {}
-
-export class CreateMultipleNotifyBodyDTO extends createZodDto(CreateMultipleNotifyBodySchema) {}
 
 export class GetNotifiesByRecipientIdResDTO extends createZodDto(GetNotifiesByRecipientIdResSchema) {}
 

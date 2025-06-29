@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { parse } from 'date-fns'
 import {
+  CreateNotifyPromotionBodyType,
   CreatePromotionBodyType,
   GetPromotionsQueryType,
   UpdatePromotionBodyType,
 } from 'src/routes/promotion/promotion.model'
+import { ORDER_STATUS } from 'src/shared/constants/order.constant'
+import { PartnerStatus } from 'src/shared/constants/partner.constant'
 import { toStartOfUTCDate } from 'src/shared/helpers'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
@@ -16,7 +19,7 @@ export class PromotionRepo {
     return await this.prismaService.promotion.findFirst({
       where: {
         deletedAt: null,
-        AND: [{ validFrom: { lte: validUntil } }, { validUntil: { gte: validFrom } }],
+        AND: [{ validFrom: { lt: validUntil } }, { validUntil: { gt: validFrom } }],
       },
     })
   }
@@ -58,6 +61,15 @@ export class PromotionRepo {
   }
 
   async find(id: number) {
+    return await this.prismaService.promotion.findUnique({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    })
+  }
+
+  async findIncludeOrder(id: number) {
     return await this.prismaService.promotion.findUnique({
       where: {
         id,
@@ -142,5 +154,47 @@ export class PromotionRepo {
       promotions, // All promotions overlapping with the input range
       todayPromotions, // Promotions active today
     }
+  }
+
+  async findPromotionInPendingOrder(promotionId: number) {
+    return await this.prismaService.promotion.findFirst({
+      where: {
+        deletedAt: null,
+        id: promotionId,
+        order: {
+          some: {
+            status: ORDER_STATUS.PENDING,
+          },
+        },
+      },
+    })
+  }
+
+  async createNotifyPromotion({ data, createdById }: { data: CreateNotifyPromotionBodyType; createdById: number }) {
+    const { promotionId, ...notifyData } = data
+
+    const partnerUserIds = await this.prismaService.partner.findMany({
+      where: { status: PartnerStatus.ACCEPTED },
+      select: { userId: true },
+    })
+
+    if (!partnerUserIds.length) return { count: 0 }
+
+    const notifications = partnerUserIds.map(({ userId }) => ({
+      ...notifyData,
+      createdById,
+      createdAt: new Date(),
+      recipientId: userId,
+    }))
+
+    const [_, result] = await this.prismaService.$transaction([
+      this.prismaService.promotion.update({
+        where: { id: promotionId },
+        data: { notifiedAt: new Date() },
+      }),
+      this.prismaService.notify.createMany({ data: notifications }),
+    ])
+
+    return result // { count: number }
   }
 }

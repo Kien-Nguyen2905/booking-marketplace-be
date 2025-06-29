@@ -9,6 +9,8 @@ import {
   UpdatePromotionResSchema,
   DeletePromotionResSchema,
   GetPromotionByValidFromResSchema,
+  CreateNotifyPromotionBodySchema,
+  CreateNotifyPromotionResSchema,
 } from 'src/routes/promotion/promotion.model'
 
 export class GetPromotionResDTO extends createZodDto(GetPromotionResSchema) {}
@@ -28,3 +30,7 @@ export class UpdatePromotionResDTO extends createZodDto(UpdatePromotionResSchema
 export class DeletePromotionResDTO extends createZodDto(DeletePromotionResSchema) {}
 
 export class GetPromotionByValidFromResDTO extends createZodDto(GetPromotionByValidFromResSchema) {}
+
+export class CreateNotifyPromotionBodyDTO extends createZodDto(CreateNotifyPromotionBodySchema) {}
+
+export class CreateNotifyPromotionResDTO extends createZodDto(CreateNotifyPromotionResSchema) {}

@@ -23,13 +23,6 @@ export const CreateNotifyBodySchema = NotifySchema.omit({
   readAt: true,
 }).strict()
 
-export const CreateMultipleNotifyBodySchema = NotifySchema.omit({
-  id: true,
-  createdAt: true,
-  createdById: true,
-  readAt: true,
-}).strict()
-
 export const CreateNotifyResSchema = NotifySchema
 
 export const UpdateNotifyReadAtResSchema = NotifySchema
@@ -41,8 +34,6 @@ export type GetNotifiesByRecipientIdQueryType = z.infer<typeof GetNotifiesByReci
 
 export type CreateNotifyBodyType = z.infer<typeof CreateNotifyBodySchema>
 export type CreateNotifyResType = z.infer<typeof CreateNotifyResSchema>
-
-export type CreateMultipleNotifyBodyType = z.infer<typeof CreateMultipleNotifyBodySchema>
 
 export type UpdateNotifyReadAtResType = z.infer<typeof UpdateNotifyReadAtResSchema>
 export type DeleteNotifyResType = z.infer<typeof DeleteNotifyResSchema>

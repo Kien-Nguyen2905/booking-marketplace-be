@@ -198,6 +198,7 @@ model Promotion {
   validUntil      DateTime  @db.Date
   createdById     Int
   deletedAt       DateTime? @db.Timestamp(6)
+  notifiedAt      DateTime? @db.Timestamp(6)
   createdAt       DateTime? @default(now()) @db.Timestamp(6)
   updatedAt       DateTime? @default(now()) @db.Timestamp(6)
   order           Order[]

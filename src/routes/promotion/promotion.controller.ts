@@ -1,6 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { PromotionService } from './promotion.service'
 import {
+  CreateNotifyPromotionBodyDTO,
+  CreateNotifyPromotionResDTO,
   CreatePromotionBodyDTO,
   CreatePromotionResDTO,
   DeletePromotionResDTO,
@@ -53,5 +55,11 @@ export class PromotionController {
   @ZodSerializerDto(DeletePromotionResDTO)
   async delete(@Param('id') id: string) {
     return await this.promotionService.deletePromotion(+id)
+  }
+
+  @Post('notify')
+  @ZodSerializerDto(CreateNotifyPromotionResDTO)
+  async notifyToPartners(@Body() body: CreateNotifyPromotionBodyDTO, @ActiveUser('userId') userId: number) {
+    return await this.promotionService.notifyToPartners({ data: body, createdById: userId })
   }
 }

@@ -13,6 +13,7 @@ export const PromotionSchema = z.object({
   validUntil: z.coerce.date(),
   createdById: z.number().int().positive(),
   deletedAt: z.date().nullable(),
+  notifiedAt: z.date().nullable(),
   createdAt: z.coerce.date().nullable(),
   updatedAt: z.date().nullable(),
 })

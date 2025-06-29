@@ -6,10 +6,12 @@ export const PromotionRangeDateAlreadyExistsException = new BadRequestException(
 
 export const PromotionNotFoundException = new BadRequestException('Promotion not found')
 
-export const PromotionIsActiveException = new BadRequestException('Cannot update promotion active')
+export const PromotionIsActiveException = new BadRequestException('Promotion is active')
 
-export const DeletePromotionIsActiveException = new BadRequestException('Cannot delete promotion active')
-
-export const PromotionExpiredException = new BadRequestException('Cannot update promotion expired')
+export const PromotionExpiredException = new BadRequestException('Promotion is expired')
 
 export const PromotionUsedException = new BadRequestException('Promotion has been used')
+
+export const PromotionInPendingException = new BadRequestException('Promotion has been used')
+
+export const PromotionAlreadyNotifyException = new BadRequestException('Promotion has been notified')
