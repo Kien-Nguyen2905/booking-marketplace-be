@@ -15,5 +15,7 @@ export const SortBy = {
 
 export const PREFIX_PAYMENT_CODE = 'DH'
 
+export const POINT_VALUE = 1000
+
 export type OrderByType = (typeof OrderBy)[keyof typeof OrderBy]
 export type SortByType = (typeof SortBy)[keyof typeof SortBy]

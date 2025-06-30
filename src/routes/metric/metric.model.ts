@@ -31,22 +31,28 @@ export const DashboardRevenueItemSchema = z.object({
   revenue: z.number(),
 })
 
-export const DashboardCommissionItemSchema = z.object({
+export const DashboardProfitItemSchema = z.object({
   date: z.string(),
-  commission: z.number(),
+  profit: z.number(),
+})
+
+export const DashboardPartnerProfitItemSchema = z.object({
+  date: z.string(),
+  partnerProfit: z.number(),
 })
 
 export const DashboardMetricsResSchema = z.object({
   totalRevenue: z.number(),
-  totalCommission: z.number(),
-  totalBooked: z.number(),
-  totalCanceled: z.number(),
-  totalRefunded: z.number(),
   totalRevenueInRange: z.array(DashboardRevenueItemSchema),
-  totalCommissionInRange: z.array(DashboardCommissionItemSchema),
+
+  totalPartnerProfit: z.number(),
+  totalPartnerProfitInRange: z.array(DashboardPartnerProfitItemSchema),
+
+  totalPlatformProfit: z.number(),
+  totalPlatformProfitInRange: z.array(DashboardProfitItemSchema),
+
+  totalBooked: z.number(),
   hotels: z.array(DashboardHotelItemSchema),
-  totalPartner: z.number(),
-  totalPartnerInRange: z.array(z.object({ date: z.string(), profit: z.number() })),
 })
 
 export type DashboardMetricsQueryType = z.infer<typeof DashboardMetricsQuerySchema>
@@ -77,15 +83,15 @@ export const DashboardRoomTypeItemSchema = z.object({
 })
 
 export const PartnerDashboardMetricsResSchema = z.object({
+  totalProfit: z.number(),
   totalRevenue: z.number(),
-  totalCommission: z.number(),
   totalBooked: z.number(),
   totalCanceled: z.number(),
   totalRefunded: z.number(),
   totalNoShowBanking: z.number(),
   totalNoShowPayAtHotel: z.number(),
   totalCheckout: z.number(),
-  totalRevenueInRange: z.array(DashboardRevenueItemSchema),
+  totalProfitInRange: z.array(z.object({ date: z.string(), profit: z.number() })),
   roomTypes: z.array(DashboardRoomTypeItemSchema),
 })
 

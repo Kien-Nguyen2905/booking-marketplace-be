@@ -23,10 +23,12 @@ export class MetricRepo {
         lte: dateTo,
       }
     }
+
     // 1. Metrics về tổng doanh thu và hoa hồng
     const totalRevenueAgg = await this.prismaService.order.aggregate({
       _sum: {
-        commissionAmount: true,
+        platformProfit: true,
+        partnerProfit: true,
         totalPrice: true,
       },
       where: {
@@ -42,20 +44,16 @@ export class MetricRepo {
     })
 
     const totalRevenue = totalRevenueAgg._sum.totalPrice || 0
-    const totalCommission = totalRevenueAgg._sum.commissionAmount || 0
-    const totalPartner = totalRevenue - totalCommission
+    const totalPlatformProfit = totalRevenueAgg._sum.platformProfit || 0
+    const totalPartnerProfit = totalRevenueAgg._sum.partnerProfit || 0
+
     // 2. Tổng số đơn đã booking, hủy và hoàn tiền trong khoảng ngày
-    const [totalBooked, totalCanceled, totalRefunded] = await Promise.all([
-      this.prismaService.order.count({
-        where: { ...dateRangeFilter, status: ORDER_STATUS.CONFIRMED },
-      }),
-      this.prismaService.order.count({
-        where: { ...dateRangeFilter, status: ORDER_STATUS.CANCELED },
-      }),
-      this.prismaService.order.count({
-        where: { ...dateRangeFilter, status: ORDER_STATUS.REFUNDED },
-      }),
-    ])
+    const totalBooked = await this.prismaService.order.count({
+      where: {
+        ...dateRangeFilter,
+        OR: [{ status: ORDER_STATUS.CONFIRMED }, { status: ORDER_STATUS.CHECKOUT }, { status: ORDER_STATUS.NO_SHOW }],
+      },
+    })
 
     // 3. Tổng doanh thu hoa hồng kiếm được theo ngày
     const revenueOrders = await this.prismaService.order.findMany({
@@ -71,38 +69,41 @@ export class MetricRepo {
       },
       select: {
         checkoutDate: true,
-        commissionAmount: true,
+        platformProfit: true,
+        partnerProfit: true,
         totalPrice: true,
       },
     })
 
     const revenueByDateMap = new Map<string, number>()
-    const commissionByDateMap = new Map<string, number>()
-    const partnerByDateMap = new Map<string, number>()
+    const platformProfitByDateMap = new Map<string, number>()
+    const partnerProfitByDateMap = new Map<string, number>()
+
     for (const order of revenueOrders) {
       const dateStr = order.checkoutDate.toISOString().split('T')[0]
       revenueByDateMap.set(dateStr, (revenueByDateMap.get(dateStr) || 0) + order.totalPrice)
-      const commission = order.commissionAmount || 0
-      commissionByDateMap.set(dateStr, (commissionByDateMap.get(dateStr) || 0) + commission)
-      partnerByDateMap.set(dateStr, (partnerByDateMap.get(dateStr) || 0) + (order.totalPrice - commission))
+      platformProfitByDateMap.set(dateStr, platformProfitByDateMap.get(dateStr) || 0 + order.platformProfit)
+      partnerProfitByDateMap.set(dateStr, partnerProfitByDateMap.get(dateStr) || 0 + order.partnerProfit)
     }
 
     const totalRevenueInRange = Array.from(revenueByDateMap.entries())
       .map(([date, revenue]) => ({ date, revenue }))
       .sort((a, b) => a.date.localeCompare(b.date))
 
-    const totalCommissionInRange = Array.from(commissionByDateMap.entries())
-      .map(([date, commission]) => ({ date, commission }))
+    const totalPlatformProfitInRange = Array.from(platformProfitByDateMap.entries())
+      .map(([date, profit]) => ({ date, profit }))
       .sort((a, b) => a.date.localeCompare(b.date))
 
-    const totalPartnerInRange = Array.from(partnerByDateMap.entries())
-      .map(([date, profit]) => ({ date, profit }))
+    const totalPartnerProfitInRange = Array.from(partnerProfitByDateMap.entries())
+      .map(([date, partnerProfit]) => ({ date, partnerProfit }))
       .sort((a, b) => a.date.localeCompare(b.date))
 
     // 4. Thống kê đối tác/khách sạn
     const ordersInRange = await this.prismaService.order.findMany({
       where: {
-        status: ORDER_STATUS.CONFIRMED,
+        status: {
+          in: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CHECKOUT],
+        },
         checkinDate: {
           gte: dateFrom,
           lte: dateTo,
@@ -125,14 +126,12 @@ export class MetricRepo {
 
     return {
       totalRevenue,
-      totalCommission,
-      totalPartner,
-      totalPartnerInRange,
-      totalBooked,
-      totalCanceled,
-      totalRefunded,
       totalRevenueInRange,
-      totalCommissionInRange,
+      totalPartnerProfit,
+      totalPartnerProfitInRange,
+      totalPlatformProfit,
+      totalPlatformProfitInRange,
+      totalBooked,
       hotels,
     }
   }
@@ -158,11 +157,11 @@ export class MetricRepo {
         lte: dateTo,
       }
     }
-    // 1. Get total revenue for this hotel
-    const totalRevenueAgg = await this.prismaService.order.aggregate({
+    // 1. Get total partner profit for this hotel
+    const totalPartnerProfitAgg = await this.prismaService.order.aggregate({
       _sum: {
+        partnerProfit: true,
         totalPrice: true,
-        commissionAmount: true,
       },
       where: {
         hotelId,
@@ -177,8 +176,8 @@ export class MetricRepo {
       },
     })
 
-    const totalRevenue = totalRevenueAgg._sum.totalPrice || 0
-    const totalCommission = totalRevenueAgg._sum.commissionAmount || 0
+    const totalProfit = totalPartnerProfitAgg._sum.partnerProfit || 0
+    const totalRevenue = totalPartnerProfitAgg._sum.totalPrice || 0
     // 2. Get booking counts
     const [totalBooked, totalCanceled, totalRefunded, totalNoShowBanking, totalNoShowPayAtHotel, totalCheckout] =
       await Promise.all([
@@ -223,7 +222,7 @@ export class MetricRepo {
       ])
 
     // 3. Get daily revenue data
-    const revenueOrders = await this.prismaService.order.findMany({
+    const partnerProfitOrders = await this.prismaService.order.findMany({
       where: {
         ...dateRangeFilter,
         OR: [
@@ -236,18 +235,18 @@ export class MetricRepo {
       },
       select: {
         checkoutDate: true,
-        totalPrice: true,
+        partnerProfit: true,
       },
     })
 
-    const revenueByDateMap = new Map<string, number>()
-    for (const order of revenueOrders) {
+    const partnerProfitByDateMap = new Map<string, number>()
+    for (const order of partnerProfitOrders) {
       const dateStr = order.checkoutDate.toISOString().split('T')[0]
-      revenueByDateMap.set(dateStr, (revenueByDateMap.get(dateStr) || 0) + order.totalPrice)
+      partnerProfitByDateMap.set(dateStr, (partnerProfitByDateMap.get(dateStr) || 0) + order.partnerProfit)
     }
 
-    const totalRevenueInRange = Array.from(revenueByDateMap.entries())
-      .map(([date, revenue]) => ({ date, revenue }))
+    const totalProfitInRange = Array.from(partnerProfitByDateMap.entries())
+      .map(([date, profit]) => ({ date, profit }))
       .sort((a, b) => a.date.localeCompare(b.date))
 
     // 4. Get room type statistics
@@ -258,7 +257,9 @@ export class MetricRepo {
           gte: dateFrom,
           lte: dateTo,
         },
-        status: ORDER_STATUS.CONFIRMED,
+        status: {
+          in: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CHECKOUT],
+        },
       },
       include: {
         room: {
@@ -280,15 +281,15 @@ export class MetricRepo {
       .sort((a, b) => b.bookings - a.bookings)
 
     return {
+      totalProfit,
       totalRevenue,
-      totalCommission,
       totalBooked,
       totalCanceled,
       totalRefunded,
       totalNoShowBanking,
       totalNoShowPayAtHotel,
       totalCheckout,
-      totalRevenueInRange,
+      totalProfitInRange,
       roomTypes,
     }
   }
