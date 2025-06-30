@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { PaymentType } from '@prisma/client'
 import { eachDayOfInterval, format, subDays } from 'date-fns'
 import { CouponNotFoundException } from 'src/routes/coupon/coupon.error'
 import { HotelNotFoundException } from 'src/routes/hotel/hotel.error'
@@ -14,7 +13,8 @@ import { PromotionNotFoundException } from 'src/routes/promotion/promotion.error
 import { RoomNotFoundException } from 'src/routes/room/room.error'
 import { HotelStatus } from 'src/shared/constants/hotel.constant'
 import { ORDER_STATUS, OrderStatusType } from 'src/shared/constants/order.constant'
-import { PAYMENT_TYPE } from 'src/shared/constants/payment.constant'
+import { POINT_VALUE } from 'src/shared/constants/other.constant'
+import { PAYMENT_TYPE, PaymentType } from 'src/shared/constants/payment.constant'
 import { toStartOfUTCDate } from 'src/shared/helpers'
 import { OrderProducer } from 'src/shared/producers/order.producer'
 import { PrismaService } from 'src/shared/services/prisma.service'
@@ -174,7 +174,8 @@ export class OrderRepo {
       vatAmount,
       serviceFeeAmount,
       totalPrice,
-      commissionAmount,
+      platformProfit,
+      partnerProfit,
       promotionAmount,
       arrivalTime,
     } = data
@@ -251,7 +252,6 @@ export class OrderRepo {
     }
 
     //5. Kiểm tra promotion
-
     if (promotionId) {
       const promotion = await this.prismaService.promotion.findUnique({
         where: {
@@ -268,8 +268,20 @@ export class OrderRepo {
       }
     }
 
-    // 6. Tạo order và cập nhật RoomAvailability
+    // 6. Tạo order ,cập nhật điểm, cập nhật RoomAvailability
     const order = await this.prismaService.$transaction(async (tx) => {
+      if (pointDiscount > 0) {
+        await tx.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            earnPoint: {
+              decrement: pointDiscount / POINT_VALUE,
+            },
+          },
+        })
+      }
       const customer = await tx.customer.create({
         data: {
           fullName,
@@ -295,8 +307,12 @@ export class OrderRepo {
           vatAmount,
           serviceFeeAmount,
           totalPrice,
-          commissionAmount,
-          status: paymentType === PAYMENT_TYPE.PAY_AT_HOTEL ? ORDER_STATUS.CONFIRMED : ORDER_STATUS.PENDING,
+          platformProfit,
+          partnerProfit,
+          status:
+            paymentType === PAYMENT_TYPE.PAY_AT_HOTEL || totalPrice === 0
+              ? ORDER_STATUS.CONFIRMED
+              : ORDER_STATUS.PENDING,
           paymentType,
           arrivalTime,
         },
@@ -449,16 +465,18 @@ export class OrderRepo {
           updatedAt: new Date(),
         },
       })
-      await this.prismaService.hotel.update({
-        where: {
-          id: order.hotelId,
-        },
-        data: {
-          reputationScore: {
-            decrement: 5,
+      if (order.pointDiscount > 0) {
+        await this.prismaService.user.update({
+          where: {
+            id: order.userId,
           },
-        },
-      })
+          data: {
+            earnPoint: {
+              increment: order.pointDiscount / POINT_VALUE,
+            },
+          },
+        })
+      }
       if (order.couponId) {
         await this.prismaService.coupon.update({
           where: {
@@ -471,6 +489,17 @@ export class OrderRepo {
           },
         })
       }
+      await this.prismaService.hotel.update({
+        where: {
+          id: order.hotelId,
+        },
+        data: {
+          reputationScore: {
+            decrement: 5,
+          },
+        },
+      })
+
       const checkinDate = toStartOfUTCDate(order.checkinDate)
       const checkoutDate = toStartOfUTCDate(order.checkoutDate)
 
@@ -577,16 +606,18 @@ export class OrderRepo {
           updatedAt: new Date(),
         },
       })
-      await this.prismaService.hotel.update({
-        where: {
-          id: order.hotelId,
-        },
-        data: {
-          reputationScore: {
-            decrement: 5,
+      if (order.pointDiscount > 0) {
+        await this.prismaService.user.update({
+          where: {
+            id: order.userId,
           },
-        },
-      })
+          data: {
+            earnPoint: {
+              increment: order.pointDiscount / POINT_VALUE,
+            },
+          },
+        })
+      }
       if (order.couponId) {
         await this.prismaService.coupon.update({
           where: {
@@ -599,6 +630,17 @@ export class OrderRepo {
           },
         })
       }
+      await this.prismaService.hotel.update({
+        where: {
+          id: order.hotelId,
+        },
+        data: {
+          reputationScore: {
+            decrement: 5,
+          },
+        },
+      })
+
       const checkinDate = toStartOfUTCDate(order.checkinDate)
       const checkoutDate = toStartOfUTCDate(order.checkoutDate)
 
@@ -794,6 +836,7 @@ export class OrderRepo {
   }
 
   async exportPartnerRevenue({ dateFrom, dateTo }: ExportPartnerRevenueType) {
+    // Tìm ra đơn đã checkout hoặc đơn đã thanh toán nhưng không tới
     const orders = await this.prismaService.order.findMany({
       where: {
         OR: [
@@ -826,7 +869,9 @@ export class OrderRepo {
         },
       },
     })
-
+    if (!orders.length) {
+      return []
+    }
     const partnerRevenueMap = new Map<
       number,
       {
@@ -836,10 +881,11 @@ export class OrderRepo {
         bankName: string
         bankAccount: string
         countOrder: number
-        totalOrderValue: number // Tổng giá trị đơn hàng
-        totalPrice: number // Tổng tiền thanh toán qua nền tảng (BANKING)
-        hotelPayment: number // Tổng tiền thanh toán tại khách sạn (PAY_AT_HOTEL)
-        commissionAmount: number
+        totalOrderValue: number
+        totalBankingPayment: number
+        totalHotelPayment: number
+        platformProfit: number
+        partnerProfit: number
         transferAmount: number
       }
     >()
@@ -857,30 +903,36 @@ export class OrderRepo {
           bankAccount: partner.bankAccount || 'N/A',
           countOrder: 0,
           totalOrderValue: 0,
-          totalPrice: 0,
-          hotelPayment: 0,
-          commissionAmount: 0,
+          totalBankingPayment: 0,
+          totalHotelPayment: 0,
+          platformProfit: 0,
+          partnerProfit: 0,
           transferAmount: 0,
         })
       }
 
       const current = partnerRevenueMap.get(partnerId)!
+      const orderPrice = order.totalPrice ?? 0
+      const partnerAmount = order.partnerProfit ?? 0
+      const platformAmount = order.platformProfit ?? 0
+
       current.countOrder += 1
-      current.totalOrderValue += order.totalPrice || 0 // Tổng giá trị đơn hàng
-      current.commissionAmount += order.commissionAmount || 0 // Tổng hoa hồng
+      current.totalOrderValue += orderPrice
+      current.partnerProfit += partnerAmount
+      current.platformProfit += platformAmount
 
       if (order.paymentType === PAYMENT_TYPE.PAY_AT_HOTEL) {
-        current.hotelPayment += order.totalPrice || 0 // Tổng tiền thanh toán tại khách sạn
+        current.totalHotelPayment += orderPrice
       } else {
-        current.totalPrice += order.totalPrice || 0 // Tổng tiền thanh toán qua nền tảng
+        current.totalBankingPayment += orderPrice
       }
     }
     const result = Array.from(partnerRevenueMap.values())
       .map((data) => ({
         ...data,
+        transferAmount: data.partnerProfit - data.totalHotelPayment,
         startDate: format(dateFrom || new Date(), 'dd/MM/yyyy'),
         endDate: format(dateTo || new Date(), 'dd/MM/yyyy'),
-        transferAmount: data.totalOrderValue - data.commissionAmount - data.hotelPayment,
       }))
       .sort((a, b) => b.totalOrderValue - a.totalOrderValue)
 
@@ -899,3 +951,25 @@ export class OrderRepo {
     })
   }
 }
+
+// if (order.paymentType === PAYMENT_TYPE.PAY_AT_HOTEL) {
+//   current.totalHotelPayment += orderPrice
+//   // Đối tác giữ tiền → đối tác cần chuyển lại cho sàn
+//   if (platformAmount >= 0) {
+//     // Sàn có lời → đối tác phải trả phần hoa hồng này => trừ tiền cuối tháng
+//     current.transferAmount -= platformAmount
+//   } else {
+//     // Sàn bị lỗ → sàn cần chuyển thêm tiền cho đối tác => cộng tiền cuối tháng
+//     current.transferAmount += Math.abs(platformAmount)
+//   }
+// } else {
+//   current.totalBankingPayment += orderPrice
+//   // Sàn giữ tiền → cần chuyển cho đối tác
+//   if (platformAmount >= 0) {
+//     // Sàn có lời → chỉ chuyển phần lợi nhuận đối tác => cộng tiền cuối tháng
+//     current.transferAmount += partnerAmount
+//   } else {
+//     // Sàn lỗ → phải chuyển cả phần lỗ bù thêm => cộng tiền cuối tháng
+//     current.transferAmount += orderPrice + Math.abs(platformAmount)
+//   }
+// }

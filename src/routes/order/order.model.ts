@@ -191,9 +191,10 @@ export const ExportPartnerRevenueResSchema = z.array(
     bankAccount: z.string(),
     countOrder: z.number(),
     totalOrderValue: z.number(),
-    totalPrice: z.number(),
-    hotelPayment: z.number(),
-    commissionAmount: z.number(),
+    totalBankingPayment: z.number(),
+    totalHotelPayment: z.number(),
+    platformProfit: z.number(),
+    partnerProfit: z.number(),
     transferAmount: z.number(),
   }),
 )

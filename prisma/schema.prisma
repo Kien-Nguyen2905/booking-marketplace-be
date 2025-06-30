@@ -118,16 +118,17 @@ model Order {
   quantity         Int
   checkinDate      DateTime     @db.Date
   checkoutDate     DateTime     @db.Date
-  basePrice        Float        @db.Real
-  pointDiscount    Float        @default(0) @db.Real
+  basePrice        Int       
+  pointDiscount    Int        @default(0)
   couponId         Int?
-  couponAmount     Float        @default(0) @db.Real
+  couponAmount     Int        @default(0)
   promotionId      Int?
-  promotionAmount  Float        @default(0) @db.Real
-  vatAmount        Float        @db.Real
-  serviceFeeAmount Float        @db.Real
-  totalPrice       Float        @db.Real
-  commissionAmount Float        @db.Real
+  promotionAmount  Int        @default(0)
+  vatAmount        Int       
+  serviceFeeAmount Int       
+  totalPrice       Int       
+  platformProfit   Int       @default(0)
+  partnerProfit    Int       @default(0)
   status           OrderStatus? @default(PENDING)
   paymentType      PaymentType
   arrivalTime      DateTime?    @db.Timestamp(6)
