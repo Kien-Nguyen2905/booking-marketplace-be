@@ -430,10 +430,13 @@ export class OrderRepo {
         },
       })
       for (const roomAvailability of roomAvailabilities) {
-        await tx.roomAvailability.update({
+        const updateResult = await tx.roomAvailability.update({
           where: {
             id: roomAvailability.id,
             version: roomAvailability.version,
+            availableRooms: {
+              lte: roomAvailability.totalRooms - order.quantity, // not exceed totalRooms
+            },
           },
           data: {
             availableRooms: {
@@ -442,6 +445,9 @@ export class OrderRepo {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
 
       return order
@@ -514,10 +520,13 @@ export class OrderRepo {
       })
 
       for (const roomAvailability of roomAvailabilities) {
-        await tx.roomAvailability.update({
+        const updateResult = await tx.roomAvailability.update({
           where: {
             id: roomAvailability.id,
             version: roomAvailability.version,
+            availableRooms: {
+              lte: roomAvailability.totalRooms - order.quantity, // not exceed totalRooms
+            },
           },
           data: {
             availableRooms: {
@@ -526,6 +535,9 @@ export class OrderRepo {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
 
       return order
@@ -567,10 +579,13 @@ export class OrderRepo {
       })
 
       for (const roomAvailability of roomAvailabilities) {
-        await tx.roomAvailability.update({
+        const updateResult = await tx.roomAvailability.update({
           where: {
             id: roomAvailability.id,
             version: roomAvailability.version,
+            availableRooms: {
+              lte: roomAvailability.totalRooms - order.quantity, // not exceed totalRooms
+            },
           },
           data: {
             availableRooms: {
@@ -579,6 +594,9 @@ export class OrderRepo {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
 
       return order
@@ -655,10 +673,13 @@ export class OrderRepo {
       })
 
       for (const roomAvailability of roomAvailabilities) {
-        await tx.roomAvailability.update({
+        const updateResult = await tx.roomAvailability.update({
           where: {
             id: roomAvailability.id,
             version: roomAvailability.version,
+            availableRooms: {
+              lte: roomAvailability.totalRooms - order.quantity, // not exceed totalRooms
+            },
           },
           data: {
             availableRooms: {
@@ -667,6 +688,9 @@ export class OrderRepo {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
 
       await this.prismaService.notify.create({
@@ -728,10 +752,13 @@ export class OrderRepo {
       })
 
       for (const roomAvailability of roomAvailabilities) {
-        await tx.roomAvailability.update({
+        const updateResult = await tx.roomAvailability.update({
           where: {
             id: roomAvailability.id,
             version: roomAvailability.version,
+            availableRooms: {
+              lte: roomAvailability.totalRooms - order.quantity, // not exceed totalRooms
+            },
           },
           data: {
             availableRooms: {
@@ -740,6 +767,9 @@ export class OrderRepo {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
       await this.prismaService.notify.create({
         data: {
@@ -801,10 +831,13 @@ export class OrderRepo {
       })
 
       for (const roomAvailability of roomAvailabilities) {
-        await tx.roomAvailability.update({
+        const updateResult = await tx.roomAvailability.update({
           where: {
             id: roomAvailability.id,
             version: roomAvailability.version,
+            availableRooms: {
+              lte: roomAvailability.totalRooms - order.quantity, // not exceed totalRooms
+            },
           },
           data: {
             availableRooms: {
@@ -813,6 +846,9 @@ export class OrderRepo {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
       await this.prismaService.notify.create({
         data: {

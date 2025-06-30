@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { addDays, eachDayOfInterval } from 'date-fns'
+import { ConflictRoomAvailabilityException } from 'src/routes/order/order.error'
 import { ORDER_STATUS } from 'src/shared/constants/order.constant'
 import { PAYMENT_TYPE } from 'src/shared/constants/payment.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
@@ -46,7 +47,7 @@ export class SharedOrderRepository {
       const dateRange = eachDayOfInterval({ start: addDays(checkinDate, 1), end: checkoutDate })
 
       for (const date of dateRange) {
-        await tx.roomAvailability.updateMany({
+        const updateResult = await tx.roomAvailability.updateMany({
           where: {
             roomId,
             createdAt: date,
@@ -56,6 +57,9 @@ export class SharedOrderRepository {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
 
       // Restore coupon usage if applied

@@ -47,7 +47,7 @@ export class MetricRepo {
     const totalPlatformProfit = totalRevenueAgg._sum.platformProfit || 0
     const totalPartnerProfit = totalRevenueAgg._sum.partnerProfit || 0
 
-    // 2. Tổng số đơn đã booking, hủy và hoàn tiền trong khoảng ngày
+    // 2. Tổng số đơn đã được đặt
     const totalBooked = await this.prismaService.order.count({
       where: {
         ...dateRangeFilter,

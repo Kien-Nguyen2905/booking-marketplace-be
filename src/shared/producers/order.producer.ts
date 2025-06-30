@@ -18,6 +18,11 @@ export class OrderProducer {
         jobId: `orderId-${orderId}`,
         removeOnComplete: true,
         removeOnFail: true,
+        attempts: 3, // Retry up to 3 times
+        backoff: {
+          type: 'exponential', // Double delay with each retry
+          delay: 1000 * 5, // Initial retry delay of 5 seconds
+        },
       },
     )
   }

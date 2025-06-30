@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { eachDayOfInterval, format, parse, subDays } from 'date-fns'
+import { ConflictRoomAvailabilityException } from 'src/routes/order/order.error'
 import { RoomNotFoundException } from 'src/routes/room/room.error'
 import { CreateRoomBodyType } from 'src/routes/room/room.model'
 import { ORDER_STATUS } from 'src/shared/constants/order.constant'
@@ -122,7 +123,7 @@ export class RoomRepo {
           newAvailableRooms = oldAvailableRooms + Math.abs(oldTotalRooms - data.quantity)
         }
 
-        await tx.roomAvailability.update({
+        const updateResult = await tx.roomAvailability.update({
           where: { id: availability.id },
           data: {
             totalRooms: data.quantity,
@@ -130,6 +131,9 @@ export class RoomRepo {
             version: { increment: 1 },
           },
         })
+        if (updateResult === null) {
+          throw ConflictRoomAvailabilityException
+        }
       }
       return await tx.room.update({
         where: {

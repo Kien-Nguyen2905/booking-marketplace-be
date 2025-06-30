@@ -51,26 +51,11 @@ export const CreatePromotionBodySchema = PromotionSchema.omit({
   id: true,
   createdById: true,
   deletedAt: true,
+  notifiedAt: true,
   createdAt: true,
   updatedAt: true,
-})
-  .strict()
-  .superRefine(({ percentage, sharePercentage, validFrom, validUntil }, ctx) => {
-    if (sharePercentage > percentage) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Share percentage must be less or equal than percentage',
-        path: ['sharePercentage'],
-      })
-    }
-    if (validUntil <= validFrom) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Valid until must be greater than valid from',
-        path: ['validUntil'],
-      })
-    }
-  })
+}).strict()
+
 export const CreatePromotionResSchema = PromotionSchema
 
 export const UpdatePromotionBodySchema = CreatePromotionBodySchema

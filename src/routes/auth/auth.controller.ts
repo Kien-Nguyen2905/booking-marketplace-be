@@ -21,7 +21,6 @@ import {
   TwoFactorSetupResDTO,
 } from 'src/routes/auth/auth.dto'
 import { UserAgent } from 'src/shared/decorators/user-agent.decorator'
-import { Message } from 'src/shared/decorators/message.decorator'
 import { GoogleService } from 'src/routes/auth/google.service'
 import { Response } from 'express'
 import envConfig from 'src/shared/config'
