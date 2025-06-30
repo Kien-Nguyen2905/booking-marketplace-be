@@ -487,6 +487,7 @@ export class OrderRepo {
         await this.prismaService.coupon.update({
           where: {
             id: order.couponId,
+            deletedAt: null,
           },
           data: {
             available: {
@@ -640,6 +641,7 @@ export class OrderRepo {
         await this.prismaService.coupon.update({
           where: {
             id: order.couponId,
+            deletedAt: null,
           },
           data: {
             available: {
@@ -730,6 +732,7 @@ export class OrderRepo {
         await this.prismaService.coupon.update({
           where: {
             id: order.couponId,
+            deletedAt: null,
           },
           data: {
             available: {
@@ -809,6 +812,7 @@ export class OrderRepo {
         await this.prismaService.coupon.update({
           where: {
             id: order.couponId,
+            deletedAt: null,
           },
           data: {
             available: {

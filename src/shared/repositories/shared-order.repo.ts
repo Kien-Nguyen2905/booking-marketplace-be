@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { addDays, eachDayOfInterval } from 'date-fns'
 import { ConflictRoomAvailabilityException } from 'src/routes/order/order.error'
 import { ORDER_STATUS } from 'src/shared/constants/order.constant'
+import { POINT_VALUE } from 'src/shared/constants/other.constant'
 import { PAYMENT_TYPE } from 'src/shared/constants/payment.constant'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
@@ -21,16 +22,6 @@ export class SharedOrderRepository {
     return this.prismaService.$transaction(async (tx) => {
       const order = await tx.order.findUnique({
         where: { id: orderId },
-        select: {
-          id: true,
-          status: true,
-          paymentType: true,
-          quantity: true,
-          roomId: true,
-          couponId: true,
-          checkinDate: true,
-          checkoutDate: true,
-        },
       })
 
       // Order not found ⇒ nothing to cancel
@@ -62,10 +53,21 @@ export class SharedOrderRepository {
         }
       }
 
+      if (order.pointDiscount > 0) {
+        await tx.user.update({
+          where: { id: order.userId },
+          data: {
+            earnPoint: {
+              increment: order.pointDiscount / POINT_VALUE,
+            },
+          },
+        })
+      }
+
       // Restore coupon usage if applied
       if (order.couponId) {
         await tx.coupon.update({
-          where: { id: order.couponId },
+          where: { id: order.couponId, deletedAt: null },
           data: {
             available: { increment: 1 },
           },
