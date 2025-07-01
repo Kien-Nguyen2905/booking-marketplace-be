@@ -19,17 +19,7 @@ export const GetCustomersResSchema = z.object({
 
 export const GetCustomerResSchema = CustomerSchema
 
-export const CreateCustomerBodySchema = CustomerSchema.omit({
-  id: true,
-  createdAt: true,
-}).strict()
-
-export const CreateCustomerResSchema = CustomerSchema
-
 export type GetCustomersQueryType = z.infer<typeof GetCustomersQuerySchema>
 export type GetCustomersResType = z.infer<typeof GetCustomersResSchema>
 
 export type GetCustomerResType = z.infer<typeof GetCustomerResSchema>
-
-export type CreateCustomerBodyType = z.infer<typeof CreateCustomerBodySchema>
-export type CreateCustomerResType = z.infer<typeof CreateCustomerResSchema>

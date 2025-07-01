@@ -48,14 +48,6 @@ export class HotelService {
     return await this.hotelRepo.find(id)
   }
 
-  async findByPartnerId(partnerId: number) {
-    const hotel = await this.hotelRepo.findByPartnerId(partnerId)
-    if (!hotel) {
-      throw HotelNotFoundException
-    }
-    return hotel
-  }
-
   async update({ data, id }: { data: UpdateHotelBodyType; id: number }) {
     try {
       await this.checkHotelInOrderPending(id)

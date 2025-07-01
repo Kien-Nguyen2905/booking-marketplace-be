@@ -52,12 +52,6 @@ export class HotelController {
     return await this.hotelService.find(+id)
   }
 
-  @Get('partner/:partnerId')
-  @ZodSerializerDto(GetHotelResDTO)
-  async findById(@Param() params: { partnerId: string }) {
-    return await this.hotelService.findByPartnerId(+params.partnerId)
-  }
-
   @Put(':id')
   @ZodSerializerDto(UpdateHotelResDTO)
   async update(@Body() body: UpdateHotelBodyDTO, @Param('id') id: string) {

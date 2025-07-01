@@ -24,10 +24,6 @@ const main = async () => {
         name: ROLE_NAME.PARTNER,
         description: 'Partner role',
       },
-      {
-        name: ROLE_NAME.EMPLOYEE,
-        description: 'Employee role',
-      },
     ],
   })
 

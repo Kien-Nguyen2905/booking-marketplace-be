@@ -10,3 +10,5 @@ export const ORDER_STATUS = {
 } as const
 
 export type OrderStatusType = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS]
+
+export const MINIMUM_AMOUNT = 2000

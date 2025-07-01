@@ -2,7 +2,6 @@ export const ROLE_NAME = {
   ADMIN: 'ADMIN',
   CUSTOMER: 'CUSTOMER',
   PARTNER: 'PARTNER',
-  EMPLOYEE: 'EMPLOYEE',
 } as const
 
 export const HTTPMethod = {

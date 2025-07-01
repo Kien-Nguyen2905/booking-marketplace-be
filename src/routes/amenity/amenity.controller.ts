@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Post } from '@nestjs/common'
 import { AmenityService } from './amenity.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { CreateAmenityBodyDTO, CreateAmenityResDTO, GetAmenitiesResDTO } from 'src/routes/amenity/amenity.dto'

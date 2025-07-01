@@ -8,12 +8,14 @@ import {
   GetReviewsResDTO,
 } from 'src/routes/review/review.dto'
 import { ActiveUser } from 'src/shared/decorators/active-user.decorator'
+import { IsPublic } from 'src/shared/decorators/auth.decorator'
 
 @Controller('reviews')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Get('/hotel/:hotelId')
+  @IsPublic()
   @ZodSerializerDto(GetReviewsResDTO)
   async listByHotelId(@Query() query: GetReviewsQueryDTO, @Param('hotelId') hotelId: string) {
     return this.reviewService.listByHotelId({ ...query, hotelId: +hotelId })

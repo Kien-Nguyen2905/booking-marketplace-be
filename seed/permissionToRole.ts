@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from 'src/app.module'
+import { AuthType } from 'src/shared/constants/auth.constant'
 import { HTTPMethod, ROLE_NAME } from 'src/shared/constants/role.constant'
+import { AUTH_TYPE_KEY } from 'src/shared/decorators/auth.decorator'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
 async function bootstrap() {
@@ -15,7 +17,7 @@ async function bootstrap() {
     // Fetch existing non-deleted permissions from the database
     const permissionsInDb = await prisma.permission.findMany()
 
-    // Extract available routes from the NestJS router
+    // Extract available routes from the NestJS router and filter out public routes
     const availableRoutes: { path: string; method: keyof typeof HTTPMethod; name: string; module: string }[] =
       router.stack
         .map((layer) => {
@@ -23,6 +25,34 @@ async function bootstrap() {
             const path = layer.route?.path
             const method = String(layer.route?.stack[0].method).toUpperCase() as keyof typeof HTTPMethod
             const moduleName = String(path.split('/')[1]).toUpperCase()
+
+            // Skip public routes marked with @IsPublic or @IsPublicNotAPIKey decorators
+            // Try to get the controller and handler from the route
+            const handler = layer.route?.stack[0].handle
+            let isPublic = false
+
+            // Check if route handler has public metadata
+            if (handler && handler.constructor) {
+              // Try to get metadata from the handler method
+              try {
+                // Get the auth type metadata from the handler
+                const handlerAuthMeta = Reflect.getMetadata(AUTH_TYPE_KEY, handler)
+
+                // Check if handler is marked with IsPublic or IsPublicNotAPIKey
+                if (handlerAuthMeta) {
+                  const { authTypes } = handlerAuthMeta
+                  isPublic = authTypes.includes(AuthType.None) || authTypes.includes(AuthType.APIKey)
+                }
+              } catch (error) {
+                // Ignore metadata reading errors
+              }
+            }
+
+            if (isPublic) {
+              console.log(`Skipping public route: ${method} ${path}`)
+              return undefined
+            }
+
             return {
               path,
               method,

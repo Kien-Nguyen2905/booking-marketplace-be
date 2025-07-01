@@ -20,12 +20,6 @@ export class RefundController {
     return this.refundService.list(query)
   }
 
-  @Get('/me')
-  @ZodSerializerDto(GetRefundsResDTO)
-  async getMyRefund(@Query() query: GetRefundsQueryDTO, @ActiveUser('userId') userId: number) {
-    return this.refundService.listByUserId({ ...query, userId })
-  }
-
   @Get(':id')
   @ZodSerializerDto(GetRefundResDTO)
   async findById(@Param('id') id: string) {

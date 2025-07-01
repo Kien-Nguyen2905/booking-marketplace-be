@@ -12,10 +12,6 @@ export class RefundService {
     return await this.refundRepo.list(query)
   }
 
-  async listByUserId(query: GetRefundsQueryType & { userId: number }) {
-    return await this.refundRepo.listByUserId(query)
-  }
-
   async findById(id: number) {
     return await this.refundRepo.findById(id)
   }

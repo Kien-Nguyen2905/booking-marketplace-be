@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { CreateCustomerBodyType, GetCustomersQueryType } from 'src/routes/customer/customer.model'
+import { GetCustomersQueryType } from 'src/routes/customer/customer.model'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
 @Injectable()
@@ -33,9 +33,5 @@ export class CustomerRepo {
       limit,
       totalPages: Math.ceil(totalItems / limit),
     }
-  }
-
-  async create(data: CreateCustomerBodyType) {
-    return await this.prismaService.customer.create({ data })
   }
 }

@@ -9,5 +9,9 @@ export const Auth = (authTypes: AuthTypeType[], options?: { condition: Condition
   return SetMetadata(AUTH_TYPE_KEY, { authTypes, options: options ?? { condition: ConditionGuard.And } })
 }
 
-export const IsPublicNotAPIKey = () => Auth([AuthType.None]) //not required APIKey
-export const IsPublic = () => Auth([AuthType.APIKey]) //required APIKey
+export const IsPublicNotAPIKey = () => {
+  return Auth([AuthType.None]) //not required APIKey
+}
+export const IsPublic = () => {
+  return Auth([AuthType.APIKey]) //required APIKey
+}

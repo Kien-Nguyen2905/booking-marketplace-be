@@ -124,10 +124,6 @@ export class HotelRepo {
     return hotel
   }
 
-  async findByPartnerId(partnerId: number) {
-    return await this.prismaService.hotel.findUnique({ where: { partnerId } })
-  }
-
   async updateStatus({ data, hotelId }: { data: { status: HotelStatusType }; hotelId: number }) {
     return await this.prismaService.hotel.update({
       where: {

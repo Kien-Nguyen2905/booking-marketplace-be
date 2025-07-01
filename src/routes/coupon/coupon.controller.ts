@@ -32,7 +32,6 @@ export class CouponController {
 
   @Post('code')
   @HttpCode(200)
-  @IsPublic()
   @ZodSerializerDto(GetCouponResDTO)
   async validateCoupon(@Body() body: ValidateCouponBodyDTO) {
     return await this.couponService.validateCoupon(body.code)
