@@ -153,7 +153,7 @@ model Partner {
   email          String         @unique @db.VarChar(255)
   phoneNumber    String         @db.VarChar(20)
   idCard         String         @unique @db.VarChar(50)
-  birth          DateTime       @db.Date
+  birthday       DateTime       @db.Date
   gender         String         @db.VarChar(10)
   address        String
   provinceCode   Int

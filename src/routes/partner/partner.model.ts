@@ -30,7 +30,7 @@ export const CreatePartnerBodySchema = PartnerSchema.pick({
   email: true,
   phoneNumber: true,
   idCard: true,
-  birth: true,
+  birthday: true,
   gender: true,
   address: true,
   provinceCode: true,

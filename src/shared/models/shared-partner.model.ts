@@ -8,7 +8,7 @@ export const PartnerSchema = z.object({
   email: z.string().max(255).nonempty(),
   phoneNumber: z.string().max(20).nonempty(),
   idCard: z.string().max(50).nonempty(),
-  birth: z.coerce.date(),
+  birthday: z.coerce.date(),
   gender: z.string().max(10).nonempty(),
   address: z.string().nonempty(),
   provinceCode: z.number().int(),
