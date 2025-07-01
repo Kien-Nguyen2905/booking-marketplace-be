@@ -15,7 +15,7 @@ jobs:
           node-version: 20.18.0
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
+        run: npm i
       - name: Create .env.production file
         run: echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
       - name: Run Prisma migrations
@@ -47,7 +47,7 @@ jobs:
               echo "Cloning repository done"
               cd ~/${{ secrets.REPO_NAME }}
               echo "Installing dependencies"
-              npm ci --force
+              npm i --force
               echo "Installing dependencies done"
               echo "Setting up environment variables"
               echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
@@ -55,7 +55,7 @@ jobs:
               echo "Generating Prisma Client"
               npx prisma generate
               echo "Building application"
-              NODE_OPTIONS="--max-old-space-size=1536" npm run build
+              npm run build
               echo "Building application done"
               echo "Starting application"
               pm2 start ecosystem.config.js
@@ -70,12 +70,12 @@ jobs:
               echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
               echo "Setting up environment variables done"
               echo "Installing dependencies"
-              npm ci --force
+              npm i --force
               echo "Installing dependencies done"
               echo "Generating Prisma Client"
               npx prisma generate
               echo "Building application"
-              NODE_OPTIONS="--max-old-space-size=1536" npm run build
+              npm run build
               echo "Building application done"
               echo "Restarting application"
               pm2 restart booking-marketplace-be
