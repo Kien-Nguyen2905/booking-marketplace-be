@@ -126,7 +126,7 @@ export class HotelRepo {
     )
     return {
       ...hotel,
-      amenities,
+      amenities: amenities?.flat(),
       roomTypeAmenity: undefined,
     }
   }
