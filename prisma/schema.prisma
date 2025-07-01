@@ -219,7 +219,7 @@ model RefreshToken {
 model Refund {
   id          Int           @id @default(autoincrement())
   orderId     Int           @unique
-  amount      Float         @db.Real
+  amount      Int         
   reason      String        @db.VarChar(255)
   status      RefundStatus? @default(PENDING)
   createdById Int
@@ -256,7 +256,7 @@ model Room {
   id               Int                @id @default(autoincrement())
   hotelId          Int
   roomTypeId       Int
-  price            Float              @db.Real
+  price            Int              
   quantity         Int
   rangeLimitDate   Int?               @default(0)
   policy           PolicyType?        @default(NON_REFUNDABLE)
