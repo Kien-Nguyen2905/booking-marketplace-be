@@ -121,7 +121,14 @@ export class HotelRepo {
       const priceB = b.room?.[0]?.price ?? Infinity
       return priceA - priceB
     })
-    return hotel
+    const amenities = hotel?.roomType?.map((roomType) =>
+      roomType.roomTypeAmenity.map((roomTypeAmenity) => roomTypeAmenity.amenity),
+    )
+    return {
+      ...hotel,
+      amenities,
+      roomTypeAmenity: undefined,
+    }
   }
 
   async updateStatus({ data, hotelId }: { data: { status: HotelStatusType }; hotelId: number }) {
