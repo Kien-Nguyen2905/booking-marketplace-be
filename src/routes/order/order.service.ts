@@ -195,14 +195,12 @@ export class OrderService {
     if (order.status !== ORDER_STATUS.CONFIRMED) {
       throw new BadRequestException('Only confirmed orders can be canceled')
     }
-    const checkoutDate = subHours(order.checkoutDate, 7)
-
+    const checkinDate = subHours(order.checkinDate, 7)
+    checkinDate.setHours(14, 0, 0, 0) // 14:00 checkin date
     const nowUTC7 = getNowUTC7()
 
-    const today = startOfDay(nowUTC7)
-
-    if (checkoutDate.getTime() <= today.getTime()) {
-      throw new BadRequestException('Cannot cancel orders after checkout date')
+    if (nowUTC7.getTime() >= checkinDate.getTime()) {
+      throw new BadRequestException(`Cannot cancel after ${format(checkinDate, 'HH:mm dd/MM/yyyy')}`)
     }
     return true
   }
@@ -222,13 +220,11 @@ export class OrderService {
     }
 
     const checkinDate = subHours(order.checkinDate, 7)
-
+    checkinDate.setHours(14, 0, 0, 0) // 14:00 checkin date
     const nowUTC7 = getNowUTC7()
 
-    const today = startOfDay(nowUTC7)
-
-    if (today.getTime() >= checkinDate.getTime()) {
-      throw new BadRequestException('Cannot request refund after checkin date')
+    if (nowUTC7.getTime() >= checkinDate.getTime()) {
+      throw new BadRequestException(`Cannot refund after ${format(checkinDate, 'HH:mm dd/MM/yyyy')}`)
     }
 
     return true
