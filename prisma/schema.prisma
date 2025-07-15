@@ -278,6 +278,7 @@ model RoomAvailability {
   version        Int?      @default(0)
   createdAt      DateTime? @default(now()) @db.Date
   room           Room      @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([roomId, createdAt])
 }
 
 model RoomBed {
@@ -353,7 +354,6 @@ model User {
   bankName                        String?        @db.VarChar(255)
   roleId                          Int
   status                          UserStatus?    @default(ACTIVE)
-  createdById                     Int?
   createdAt                       DateTime?      @default(now()) @db.Timestamp(6)
   updatedAt                       DateTime?      @default(now()) @db.Timestamp(6)
   Coupon_Coupon_createdByIdToUser Coupon[]       @relation("Coupon_createdByIdToUser")
@@ -366,8 +366,6 @@ model User {
   refreshToken                    RefreshToken[]
   refund                          Refund[]
   review                          Review[]
-  user                            User?          @relation("UserToUser", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  other_User                      User[]         @relation("UserToUser")
   role                            Role           @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   wishlist                        Wishlist[]
 }

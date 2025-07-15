@@ -54,7 +54,22 @@ export const CreatePromotionBodySchema = PromotionSchema.omit({
   notifiedAt: true,
   createdAt: true,
   updatedAt: true,
-}).strict()
+})
+  .strict()
+  .superRefine(({ validFrom, validUntil }, ctx) => {
+    if (validFrom >= validUntil) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Until date must be greater than from date',
+      })
+    }
+    if (toStartOfUTCDate(validFrom) <= toStartOfUTCDate(new Date())) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Valid from date invalid',
+      })
+    }
+  })
 
 export const CreatePromotionResSchema = PromotionSchema
 

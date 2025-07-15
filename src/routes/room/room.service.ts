@@ -13,22 +13,16 @@ import { isNotFoundPrismaError, isUniqueConstraintPrismaError } from 'src/shared
 export class RoomService {
   constructor(private roomRepo: RoomRepo) {}
 
-  async checkRoomInOrder(id: number) {
+  async checkRoomInPendingOrder(id: number) {
     const room = await this.roomRepo.findRoomIncludeOrderPending(id)
-    if (!room) {
-      throw RoomNotFoundException
-    }
-    if (room?.order?.length > 0) {
+    if (room) {
       throw RoomInOrderException
     }
   }
 
-  async checkRoomInOrderConfirmed(id: number) {
+  async checkRoomInConfirmedOrder(id: number) {
     const room = await this.roomRepo.findRoomIncludeOrderConfirm(id)
-    if (!room) {
-      throw RoomNotFoundException
-    }
-    if (room?.order?.length > 0) {
+    if (room) {
       throw RoomInOrderConfirmedException
     }
   }
@@ -54,17 +48,15 @@ export class RoomService {
 
   async update({ data, id }: { data: UpdateRoomBodyType; id: number }) {
     try {
-      await this.checkRoomInOrder(id)
+      await this.checkRoomInPendingOrder(id)
       const roomConfirm = await this.roomRepo.findRoomIncludeOrderConfirm(id)
-      if (!roomConfirm) {
-        throw RoomNotFoundException
-      }
       if (
-        data.policy !== roomConfirm.policy ||
-        data.notePolicy !== roomConfirm.notePolicy ||
-        data.rangeLimitDate !== roomConfirm.rangeLimitDate
+        roomConfirm &&
+        (data.policy !== roomConfirm.policy ||
+          data.notePolicy !== roomConfirm.notePolicy ||
+          data.rangeLimitDate !== roomConfirm.rangeLimitDate)
       ) {
-        if (roomConfirm?.order?.length > 0) throw RoomInOrderConfirmedException
+        throw RoomInOrderConfirmedException
       }
       return await this.roomRepo.update({ data, id })
     } catch (error) {
@@ -77,8 +69,8 @@ export class RoomService {
 
   async delete(id: number) {
     try {
-      await this.checkRoomInOrder(id)
-      await this.checkRoomInOrderConfirmed(id)
+      await this.checkRoomInPendingOrder(id)
+      await this.checkRoomInConfirmedOrder(id)
       return await this.roomRepo.delete(id)
     } catch (error) {
       if (isNotFoundPrismaError(error)) {

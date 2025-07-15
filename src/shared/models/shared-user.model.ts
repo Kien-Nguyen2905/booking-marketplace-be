@@ -10,11 +10,10 @@ export const UserSchema = z.object({
   fullName: z
     .string()
     .trim()
-    .min(2)
     .max(255)
     .regex(/^[A-Za-zÀ-ỹ\s]+$/)
     .nullable(),
-  phoneNumber: z.string().min(9).max(20).nullable(),
+  phoneNumber: z.string().nullable(),
   avatar: z.string().nullable(),
   totpSecret: z.string().max(255).nullable(),
   uriSecret: z.string().max(255).nullable(),
@@ -57,9 +56,6 @@ export const GetUserProfileResSchema = UserSchema.omit({
     .default(PartnerStatus.PENDING),
 })
 
-/**
- * Áp dụng cho Response của api PUT('profile') và PUT('users/:userId')
- */
 export const UpdateProfileResSchema = UserSchema.omit({
   password: true,
   totpSecret: true,

@@ -8,12 +8,12 @@ import {
   isUniqueConstraintPrismaError,
 } from 'src/shared/helpers'
 import {
-  CannotUpdateOrDeleteYourselfException,
+  CannotUpdateYourselfException,
   CannotUpdateUserAdminException,
   OrderPendingOrConfirmedException,
   RoleNotFoundException,
   UserAlreadyExistsException,
-  UserHasPendingOrConfirmedOrderInHotelException,
+  PartnerHasPendingOrConfirmedOrderInHotelException,
   UserNotFoundException,
 } from 'src/routes/user/user.error'
 import { SharedUserRepository } from 'src/shared/repositories/shared-user.repo'
@@ -44,11 +44,10 @@ export class UserService {
     return user
   }
 
-  async create({ data, createdById }: { data: CreateUserBodyType; createdById: number }) {
+  async create({ data }: { data: CreateUserBodyType }) {
     try {
       const hashedPassword = await this.hashingService.hash(data.password)
       const user = await this.userRepo.create({
-        createdById,
         data: {
           ...data,
           password: hashedPassword,
@@ -87,7 +86,6 @@ export class UserService {
       if (data.status === 'INACTIVE' && role.name === ROLE_NAME.CUSTOMER) {
         await this.checkUserExistPendingAndConfirmOrder(id)
       }
-
       const updatedUser = await this.sharedUserRepository.update(
         { id },
         {
@@ -112,7 +110,7 @@ export class UserService {
 
   private verifyYourself({ userAgentId, userTargetId }: { userAgentId: number; userTargetId: number }) {
     if (userAgentId === userTargetId) {
-      throw CannotUpdateOrDeleteYourselfException
+      throw CannotUpdateYourselfException
     }
   }
 
@@ -142,7 +140,7 @@ export class UserService {
       throw UserNotFoundException
     }
     if (user?.partner?.hotel?.order?.length || 0 > 0) {
-      throw UserHasPendingOrConfirmedOrderInHotelException
+      throw PartnerHasPendingOrConfirmedOrderInHotelException
     }
   }
 }

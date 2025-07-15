@@ -169,6 +169,7 @@ export class PartnerRepo {
     return await this.prismaService.partner.update({
       where: {
         id: partnerId,
+        status: PartnerStatus.ACCEPTED,
       },
       data: {
         ...data,

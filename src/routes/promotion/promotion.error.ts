@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common'
 
 export const PromotionAlreadyExistsException = new BadRequestException('Promotion already exists')
 
-export const PromotionRangeDateAlreadyExistsException = new BadRequestException('Promotion range date already exists')
+export const PromotionRangeDateAlreadyExistsException = new BadRequestException('Promotion date already exists')
 
 export const PromotionNotFoundException = new BadRequestException('Promotion not found')
 
@@ -15,3 +15,5 @@ export const PromotionUsedException = new BadRequestException('Promotion has bee
 export const PromotionInPendingException = new BadRequestException('Promotion is in pending order')
 
 export const PromotionAlreadyNotifyException = new BadRequestException('Promotion has been notified')
+
+export const PromotionUpdatedException = new BadRequestException('Promotion has been updated, Please try again')

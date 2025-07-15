@@ -35,10 +35,8 @@ export class RoomRepo {
       where: {
         id,
         deletedAt: null,
-      },
-      include: {
         order: {
-          where: {
+          some: {
             status: ORDER_STATUS.PENDING,
           },
         },
@@ -51,10 +49,8 @@ export class RoomRepo {
       where: {
         id,
         deletedAt: null,
-      },
-      include: {
         order: {
-          where: {
+          some: {
             status: ORDER_STATUS.CONFIRMED,
           },
         },
@@ -108,6 +104,9 @@ export class RoomRepo {
       const roomAvailabilities = await tx.roomAvailability.findMany({
         where: {
           roomId: id,
+          totalRooms: {
+            not: data.quantity,
+          },
         },
       })
       for (const availability of roomAvailabilities) {

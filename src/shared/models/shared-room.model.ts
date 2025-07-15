@@ -7,7 +7,7 @@ export const RoomSchema = z.object({
   roomTypeId: z.number().int().positive(),
   price: z.number().min(1).int(),
   quantity: z.number().min(0).int(),
-  rangeLimitDate: z.number().min(0).max(7).int().optional().default(0),
+  rangeLimitDate: z.number().min(0).max(100).int().optional().default(0),
   policy: z
     .enum([POLICY_TYPE.NON_REFUNDABLE, POLICY_TYPE.FREE_CANCELLATION, POLICY_TYPE.PAY_AT_HOTEL])
     .optional()

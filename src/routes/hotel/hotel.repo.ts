@@ -105,6 +105,9 @@ export class HotelRepo {
               orderBy: {
                 price: 'asc',
               },
+              where: {
+                deletedAt: null,
+              },
             },
             roomBed: true,
             roomTypeAmenity: {
@@ -124,10 +127,14 @@ export class HotelRepo {
     const amenities = hotel?.roomType?.map((roomType) =>
       roomType.roomTypeAmenity.map((roomTypeAmenity) => roomTypeAmenity.amenity),
     )
+    const roomType = hotel?.roomType?.map((roomType, index) => ({
+      ...roomType,
+      amenities: amenities?.[index]?.map((amenity) => amenity),
+      roomTypeAmenity: undefined,
+    }))
     return {
       ...hotel,
-      amenities: amenities?.flat(),
-      roomTypeAmenity: undefined,
+      roomType,
     }
   }
 
@@ -166,6 +173,14 @@ export class HotelRepo {
       hotelId: data.hotelId,
       amenityId,
     }))
+    await this.prismaService.hotel.update({
+      where: {
+        id: data.hotelId,
+      },
+      data: {
+        updatedAt: new Date(),
+      },
+    })
     return await this.prismaService.hotelAmenity.createMany({
       data: hotelAmenities,
     })
@@ -199,6 +214,13 @@ export class HotelRepo {
         data: hotelAmenities,
       })
 
+      await prisma.hotel.update({
+        where: { id: hotelId },
+        data: {
+          updatedAt: new Date(),
+        },
+      })
+
       // Trả về danh sách Amenities mới được liên kết
       return await prisma.hotelAmenity.findMany({
         where: { hotelId: hotelId },
@@ -214,10 +236,10 @@ export class HotelRepo {
         status: 'ACTIVE',
         roomType: {
           some: {
-            deletedAt: null, // Chỉ lấy roomType chưa bị xóa
+            deletedAt: null,
             room: {
               some: {
-                deletedAt: null, // Chỉ lấy room chưa bị xóa
+                deletedAt: null,
                 quantity: {
                   gte: 1,
                 },
@@ -232,6 +254,9 @@ export class HotelRepo {
             deletedAt: null,
             quantity: {
               gte: 1,
+            },
+            roomType: {
+              deletedAt: null,
             },
           },
           include: {
@@ -300,8 +325,8 @@ export class HotelRepo {
     limit: number
     rating?: number
     type?: string
-    orderBy?: string // 'rating', 'reputationScore', 'price'
-    order?: 'asc' | 'desc' // Thứ tự sắp xếp
+    orderBy?: string
+    order?: 'asc' | 'desc'
   }) {
     const {
       province,
@@ -319,6 +344,13 @@ export class HotelRepo {
     } = query
     const skip = (page - 1) * limit
     const take = limit
+    const whereHotels: any = {}
+    if (type) {
+      whereHotels.type = type.toUpperCase() as HotelTypeType
+    }
+    if (rating) {
+      whereHotels.rating = rating
+    }
 
     // Chuyển đổi chuỗi ngày từ DD-MM-YYYY sang Date
     const startDateParsed = parse(start, 'dd-MM-yyyy', new Date())
@@ -331,17 +363,15 @@ export class HotelRepo {
       end: subDays(endDate, 1),
     })
 
-    // Validate orderBy
-    const validOrderByFields = ['rating', 'reputationScore', 'createdAt', 'price']
-    const finalOrderBy = validOrderByFields.includes(orderBy) ? orderBy : 'reputationScore'
-
     // Truy vấn hotel (bỏ skip và take để lấy toàn bộ)
+    // Không dùng skip take được vì sau câu query còn xử lý tiếp
+    // Lý do xử lý tiếp là query không kiểm tra được room availability
+    // Vì đối với bảng ghi room availability không có sẽ quy định là available còn full
     const hotels = await this.prismaService.hotel.findMany({
       where: {
         provinceCode: province,
         status: HotelStatus.ACTIVE,
-        ...(rating ? { rating: { equals: Number(rating) } } : {}),
-        ...(type ? { type: type.toUpperCase() as HotelTypeType } : {}),
+        ...whereHotels,
         roomType: {
           some: {
             deletedAt: null,
@@ -394,8 +424,8 @@ export class HotelRepo {
             quantity: { gte: available },
             roomType: {
               deletedAt: null,
-              adults: { gte: adult },
-              child: child === 0 ? undefined : { gte: child },
+              adults: { equals: adult },
+              child: child === 0 ? undefined : { equals: child },
             },
           },
           include: {
@@ -416,7 +446,7 @@ export class HotelRepo {
           take: 1,
         },
       },
-      orderBy: finalOrderBy !== 'price' ? { [finalOrderBy]: order } : undefined,
+      orderBy: orderBy !== 'price' ? { [orderBy]: order } : undefined,
     })
 
     const isRoomAvailable = (room: any, dateRange: Date[], available: number): boolean => {
@@ -462,7 +492,7 @@ export class HotelRepo {
       .filter((hotel) => hotel !== null)
 
     //  orderBy là 'price' follow the price of the first room
-    if (finalOrderBy === 'price') {
+    if (orderBy === 'price') {
       filteredHotels.sort((a, b) => {
         const aPrice = a.room[0]?.price ?? Infinity
         const bPrice = b.room[0]?.price ?? Infinity
@@ -484,15 +514,28 @@ export class HotelRepo {
     }
   }
 
-  async findHotelIncludeOrderPending(id: number) {
+  async findHotelIncludePendingOrder(id: number) {
     return await this.prismaService.hotel.findUnique({
       where: {
         id,
-      },
-      include: {
         order: {
-          where: {
+          some: {
             status: ORDER_STATUS.PENDING,
+          },
+        },
+      },
+    })
+  }
+
+  async findHotelIncludePendingOrConfirmOrder(id: number) {
+    return await this.prismaService.hotel.findUnique({
+      where: {
+        id,
+        order: {
+          some: {
+            status: {
+              in: [ORDER_STATUS.PENDING, ORDER_STATUS.CONFIRMED],
+            },
           },
         },
       },

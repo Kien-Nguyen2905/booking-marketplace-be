@@ -4,10 +4,23 @@ import { z } from 'zod'
 export const PartnerSchema = z.object({
   id: z.number().int().positive(),
   userId: z.number().int().positive(),
-  fullName: z.string().max(255).nonempty(),
+  fullName: z
+    .string()
+    .regex(/^[A-Za-zÀ-ỹ\s]+$/)
+    .max(255)
+    .nonempty(),
   email: z.string().max(255).nonempty(),
-  phoneNumber: z.string().max(20).nonempty(),
-  idCard: z.string().max(50).nonempty(),
+  phoneNumber: z
+    .string()
+    .regex(/^[0-9]+$/)
+    .min(9)
+    .max(20)
+    .nonempty(),
+  idCard: z
+    .string()
+    .regex(/^[0-9]+$/)
+    .max(50)
+    .nonempty(),
   birthday: z.coerce.date(),
   gender: z.string().max(10).nonempty(),
   address: z.string().nonempty(),
@@ -17,7 +30,11 @@ export const PartnerSchema = z.object({
   companyName: z.string().max(255),
   accountNumber: z.string().max(100).nonempty(),
   bankAccount: z.string().max(100).nonempty(),
-  bankName: z.string().max(255).nonempty(),
+  bankName: z
+    .string()
+    .regex(/^[A-Za-zÀ-ỹ\s]+$/)
+    .max(255)
+    .nonempty(),
   commissionRate: z.number(),
   status: z
     .enum([PartnerStatus.PENDING, PartnerStatus.ACCEPTED, PartnerStatus.REJECTED])

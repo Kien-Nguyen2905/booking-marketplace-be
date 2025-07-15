@@ -7,6 +7,7 @@ import {
   CouponInPendingException,
   CouponNotFoundException,
   CouponUsedException,
+  CouponUsedUpException,
 } from 'src/routes/coupon/coupon.error'
 
 @Injectable()
@@ -20,6 +21,9 @@ export class CouponService {
     }
     if (coupon.amount - coupon.available! !== 0) {
       throw CouponUsedException
+    }
+    if (coupon.available === 0) {
+      throw CouponUsedUpException
     }
     return coupon
   }

@@ -14,7 +14,11 @@ import {
   RoomTypeNotFoundException,
   TypeAlreadyExistsException,
 } from './room-type.error'
-import { isForeignKeyConstraintPrismaError, isUniqueConstraintPrismaError } from 'src/shared/helpers'
+import {
+  isForeignKeyConstraintPrismaError,
+  isNotFoundPrismaError,
+  isUniqueConstraintPrismaError,
+} from 'src/shared/helpers'
 import { HotelNotFoundException } from 'src/routes/hotel/hotel.error'
 import { RoomRepo } from 'src/routes/room/room.repo'
 
@@ -25,7 +29,7 @@ export class RoomTypeService {
     private roomRepo: RoomRepo,
   ) {}
 
-  async checkRoomTypeInOrder(roomTypeId: number) {
+  async checkRoomTypeInPendingOrConfirmedOrder(roomTypeId: number) {
     const roomType = await this.roomTypeRepo.findRoomIncludePendingOrConfirmedOrder(roomTypeId)
     if (roomType) {
       throw RoomTypeInOrderException
@@ -63,7 +67,7 @@ export class RoomTypeService {
 
   async update(data: UpdateRoomTypeBodyType & { id: number }) {
     try {
-      await this.checkRoomTypeInOrder(data.id)
+      await this.checkRoomTypeInPendingOrConfirmedOrder(data.id)
       return await this.roomTypeRepo.update(data)
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
@@ -74,32 +78,66 @@ export class RoomTypeService {
   }
 
   async delete(id: number) {
-    const rooms = await this.roomRepo.findRoomByRoomTypeId(id)
-    if (rooms?.length > 0) {
-      throw RoomTypeAlreadyHasRoomException
+    try {
+      const rooms = await this.roomRepo.findRoomByRoomTypeId(id)
+      if (rooms?.length > 0) {
+        throw RoomTypeAlreadyHasRoomException
+      }
+      await this.checkRoomTypeInPendingOrConfirmedOrder(id)
+      return await this.roomTypeRepo.delete(id)
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw RoomTypeNotFoundException
+      }
+      throw error
     }
-    await this.checkRoomTypeInOrder(id)
-    await this.checkRoomTypeExist(id)
-    return await this.roomTypeRepo.delete(id)
   }
 
   async createRoomBed(data: CreateRoomBedBodyType & { roomTypeId: number }) {
-    await this.checkRoomTypeExist(data.roomTypeId)
-    return await this.roomTypeRepo.createRoomBed({ data, roomTypeId: data.roomTypeId })
+    try {
+      await this.checkRoomTypeInPendingOrConfirmedOrder(data.roomTypeId)
+      return await this.roomTypeRepo.createRoomBed({ data, roomTypeId: data.roomTypeId })
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw RoomTypeNotFoundException
+      }
+      throw error
+    }
   }
 
   async updateRoomBed(data: UpdateRoomBedBodyType & { roomTypeId: number }) {
-    await this.checkRoomTypeExist(data.roomTypeId)
-    return await this.roomTypeRepo.updateRoomBed({ data, roomTypeId: data.roomTypeId })
+    try {
+      await this.checkRoomTypeInPendingOrConfirmedOrder(data.roomTypeId)
+      return await this.roomTypeRepo.updateRoomBed({ data, roomTypeId: data.roomTypeId })
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw RoomTypeNotFoundException
+      }
+      throw error
+    }
   }
 
   async createRoomTypeAmenities(data: CreateRoomTypeAmenitiesBodyType & { roomTypeId: number }) {
-    await this.checkRoomTypeExist(data.roomTypeId)
-    return await this.roomTypeRepo.createRoomTypeAmenities({ data, roomTypeId: data.roomTypeId })
+    try {
+      await this.checkRoomTypeInPendingOrConfirmedOrder(data.roomTypeId)
+      return await this.roomTypeRepo.createRoomTypeAmenities({ data, roomTypeId: data.roomTypeId })
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw RoomTypeNotFoundException
+      }
+      throw error
+    }
   }
 
   async updateRoomTypeAmenities(data: UpdateRoomTypeAmenitiesBodyType & { roomTypeId: number }) {
-    await this.checkRoomTypeExist(data.roomTypeId)
-    return await this.roomTypeRepo.updateRoomTypeAmenities({ data, roomTypeId: data.roomTypeId })
+    try {
+      await this.checkRoomTypeInPendingOrConfirmedOrder(data.roomTypeId)
+      return await this.roomTypeRepo.updateRoomTypeAmenities({ data, roomTypeId: data.roomTypeId })
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw RoomTypeNotFoundException
+      }
+      throw error
+    }
   }
 }

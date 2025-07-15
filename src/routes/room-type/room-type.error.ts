@@ -11,3 +11,5 @@ export const TypeAlreadyExistsException = new UnprocessableEntityException([
 ])
 
 export const RoomTypeInOrderException = new BadRequestException('Room type is in pending or confirmed order')
+
+export const RoomTypeUpdatedException = new BadRequestException('Room type has been updated, Please try again')

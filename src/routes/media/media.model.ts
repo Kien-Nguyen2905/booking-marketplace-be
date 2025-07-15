@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const PresignedUploadFileBodySchema = z
   .object({
     filename: z.string(),
-    filesize: z.number().max(3 * 1024 * 1024, 'File size must be less than 3MB'), // 3MB
+    filesize: z.number().max(1 * 1024 * 1024, 'File size must be less than 1MB'), // 1MB
   })
   .strict()
 

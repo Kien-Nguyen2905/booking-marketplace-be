@@ -11,7 +11,6 @@ import {
   PartnerAlreadyAcceptedException,
   PartnerAlreadyExistsException,
   PartnerNotFoundException,
-  PartnerUnauthorizedAccessException,
 } from 'src/routes/partner/partner.error'
 import { AuthService } from 'src/routes/auth/auth.service'
 import { TypeOfVerificationCode } from 'src/shared/constants/auth.constant'
@@ -19,7 +18,6 @@ import { isUniqueConstraintPrismaError } from 'src/shared/helpers'
 import { AuthRepository } from 'src/routes/auth/auth.repo'
 import { SharedRoleRepository } from 'src/shared/repositories/shared-role.repo'
 import { PartnerStatus } from 'src/shared/constants/partner.constant'
-import { ROLE_NAME } from 'src/shared/constants/role.constant'
 import { EmailService } from 'src/shared/services/email.service'
 
 @Injectable()
@@ -38,33 +36,29 @@ export class PartnerService {
 
   async create({ data, userId }: { data: CreatePartnerBodyType; userId: number }) {
     try {
-      // await this.authService.validateVerificationCode({
-      //   email: data.email,
-      //   code: data.code,
-      //   type: TypeOfVerificationCode.VERIFY,
-      // })
-      const adminRoleId = await this.authRepository.findUniqueUserIncludeRole({
+      await this.authService.validateVerificationCode({
         email: data.email,
+        code: data.code,
+        type: TypeOfVerificationCode.VERIFY,
       })
-      if (adminRoleId?.role.name === ROLE_NAME.ADMIN) {
-        throw PartnerUnauthorizedAccessException
-      }
+
       const { code, ...partnerData } = data
 
       const [partner] = await Promise.all([
         this.partnerRepo.create({ data: partnerData, userId }),
-        // this.authRepository.deleteVerificationCode({
-        //   email_type: {
-        //     email: data.email,
-        //     type: TypeOfVerificationCode.VERIFY,
-        //   },
-        //   code: data.code,
-        // }),
+        this.authRepository.deleteVerificationCode({
+          email_type: {
+            email: data.email,
+            type: TypeOfVerificationCode.VERIFY,
+          },
+          code: data.code,
+        }),
       ])
       return partner
     } catch (error) {
       //Unique constraint failed on the fields: (`userId`)
       //Unique constraint failed on the fields: (`email`)
+      //Unique constraint failed on the fields: (`idCard`)
       if (isUniqueConstraintPrismaError(error)) {
         throw PartnerAlreadyExistsException
       }
@@ -155,6 +149,9 @@ export class PartnerService {
     try {
       return await this.partnerRepo.updateByAdmin({ data, partnerId })
     } catch (error) {
+      //Unique constraint failed on the fields: (`userId`)
+      //Unique constraint failed on the fields: (`email`)
+      //Unique constraint failed on the fields: (`idCard`)
       if (isUniqueConstraintPrismaError(error)) {
         throw PartnerAlreadyExistsException
       }

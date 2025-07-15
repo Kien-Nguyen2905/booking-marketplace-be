@@ -42,7 +42,6 @@ export class MetricRepo {
         ],
       },
     })
-
     const totalRevenue = totalRevenueAgg._sum.totalPrice || 0
     const totalPlatformProfit = totalRevenueAgg._sum.platformProfit || 0
     const totalPartnerProfit = totalRevenueAgg._sum.partnerProfit || 0
@@ -101,9 +100,9 @@ export class MetricRepo {
     // 4. Thống kê đối tác/khách sạn
     const ordersInRange = await this.prismaService.order.findMany({
       where: {
-        status: {
-          in: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CHECKOUT],
-        },
+        // status: {
+        //   in: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CHECKOUT],
+        // },
         checkinDate: {
           gte: dateFrom,
           lte: dateTo,
@@ -123,6 +122,7 @@ export class MetricRepo {
     const hotels = Array.from(hotelCounter.entries())
       .map(([hotelName, bookings]) => ({ hotelName, bookings }))
       .sort((a, b) => b.bookings - a.bookings)
+      .slice(0, 6)
 
     return {
       totalRevenue,
@@ -279,6 +279,7 @@ export class MetricRepo {
     const roomTypes = Array.from(roomTypeCounter.entries())
       .map(([roomTypeName, bookings]) => ({ roomTypeName, bookings }))
       .sort((a, b) => b.bookings - a.bookings)
+      .slice(0, 6)
 
     return {
       totalProfit,

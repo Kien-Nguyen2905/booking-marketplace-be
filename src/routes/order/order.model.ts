@@ -119,6 +119,13 @@ export const CreateOrderBodySchema = OrderSchema.omit({
     fullName: z.string().max(100),
     phoneNumber: z.string().max(20),
     email: z.string().email(),
+    version: z.object({
+      hotel: z.string(),
+      roomType: z.string(),
+      room: z.string(),
+      coupon: z.string().optional(),
+      promotion: z.string().optional(),
+    }),
   })
   .strict()
   .superRefine(({ checkinDate, checkoutDate }, ctx) => {
@@ -126,7 +133,12 @@ export const CreateOrderBodySchema = OrderSchema.omit({
       ctx.addIssue({
         code: 'custom',
         message: 'Checkout date must be greater than check-in date',
-        path: ['checkoutDate'],
+      })
+    }
+    if (toStartOfUTCDate(checkinDate) < toStartOfUTCDate(new Date())) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Check-in date invalid',
       })
     }
   })

@@ -12,3 +12,10 @@ export const ORDER_STATUS = {
 export type OrderStatusType = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS]
 
 export const MINIMUM_AMOUNT = 2000
+
+export const REPUTATION_SCORE = {
+  CHECKOUT_SUCCESS: 2,
+  REVIEW_FROM_3: 3,
+  REVIEW_LESS_3: -3,
+  CANCEL_ORDER: 5,
+}

@@ -30,10 +30,9 @@ export class UserController {
 
   @Post()
   @ZodSerializerDto(CreateUserResDTO)
-  create(@Body() body: CreateUserBodyDTO, @ActiveUser('userId') userId: number) {
+  create(@Body() body: CreateUserBodyDTO) {
     return this.userService.create({
       data: body,
-      createdById: userId,
     })
   }
 

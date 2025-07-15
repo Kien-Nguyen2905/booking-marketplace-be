@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client'
 import { randomInt } from 'crypto'
 import { UAParser } from 'ua-parser-js'
 import path from 'path'
-// Type Predicate
 
 // Unique constraint violation
 // Ý nghĩa: Lỗi P2002 xảy ra khi bạn cố gắng tạo hoặc cập nhật một bản ghi trong cơ sở dữ liệu,
@@ -40,9 +39,27 @@ export const extractDeviceInfo = (
 } => {
   const parser = new UAParser(userAgent)
   const result = parser.getResult()
-  const browser = result.browser.name ? `${result.browser.name} ${result.browser.version}` : 'Unknown'
-  const os = result.os.name ? `${result.os.name} ${result.os.version}` : 'Unknown'
-  const deviceType = result.device.type ? result.device.type : 'Unknown'
+
+  // Lấy thông tin trình duyệt
+  const browser = result.browser.name ? `${result.browser.name} ${result.browser.version || ''}` : 'Unknown'
+
+  // Lấy thông tin hệ điều hành
+  const os = result.os.name ? `${result.os.name} ${result.os.version || ''}` : 'Unknown'
+
+  // Lấy hoặc suy ra loại thiết bị
+  let deviceType = result.device.type || 'Unknown'
+
+  // Nếu deviceType là 'Unknown', suy ra từ chuỗi UserAgent
+  if (deviceType === 'Unknown') {
+    if (/Mobile|Android|iPhone|iPad/i.test(userAgent)) {
+      deviceType = 'mobile'
+    } else if (/Tablet/i.test(userAgent)) {
+      deviceType = 'tablet'
+    } else if (/Windows|Macintosh|Linux/i.test(userAgent)) {
+      deviceType = 'desktop'
+    }
+  }
+
   return {
     browser,
     os,

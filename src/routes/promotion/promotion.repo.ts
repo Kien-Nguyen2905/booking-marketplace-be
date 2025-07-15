@@ -76,7 +76,11 @@ export class PromotionRepo {
         deletedAt: null,
       },
       include: {
-        order: true,
+        order: {
+          where: {
+            status: { in: [ORDER_STATUS.PENDING, ORDER_STATUS.CONFIRMED, ORDER_STATUS.CHECKOUT, ORDER_STATUS.NO_SHOW] },
+          },
+        },
       },
     })
   }
@@ -102,6 +106,7 @@ export class PromotionRepo {
         updatedAt: new Date(),
         percentage: data.percentage / 100,
         sharePercentage: data.sharePercentage / 100,
+        notifiedAt: null,
       },
     })
   }

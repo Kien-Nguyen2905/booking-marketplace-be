@@ -20,14 +20,14 @@ export const RoleNotFoundException = new UnprocessableEntityException([
   },
 ])
 
-export const CannotUpdateOrDeleteYourselfException = new ForbiddenException('Cannot update or delete yourself')
+export const CannotUpdateYourselfException = new ForbiddenException('Cannot update yourself')
 
 export const CannotUpdateUserAdminException = new ForbiddenException('Cannot update Admin user')
 
 export const OrderPendingOrConfirmedException = new BadRequestException('User has pending or confirmed order')
 
-export const UserHasPendingOrConfirmedOrderInHotelException = new BadRequestException(
-  'User has pending or confirmed order in hotel',
+export const PartnerHasPendingOrConfirmedOrderInHotelException = new BadRequestException(
+  'Partner has pending or confirmed order in hotel',
 )
 
 export const UserNotFoundException = new BadRequestException('User not found')

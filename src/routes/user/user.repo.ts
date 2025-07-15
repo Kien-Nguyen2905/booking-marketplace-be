@@ -54,12 +54,9 @@ export class UserRepo {
     }
   }
 
-  async create({ createdById, data }: { createdById: number | null; data: CreateUserBodyType }) {
+  async create({ data }: { data: CreateUserBodyType }) {
     return await this.prismaService.user.create({
-      data: {
-        ...data,
-        createdById,
-      },
+      data,
     })
   }
 

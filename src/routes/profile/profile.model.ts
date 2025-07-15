@@ -11,7 +11,31 @@ export const UpdateMeBodySchema = UserSchema.pick({
   accountNumber: true,
   bankAccount: true,
   bankName: true,
-}).strict()
+})
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.phoneNumber && !/^[0-9]+$/.test(value.phoneNumber)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Phone number must contain only numbers',
+        path: ['phoneNumber'],
+      })
+    }
+    if (value.phoneNumber && value.phoneNumber.length < 9) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Phone number must be at least 9 characters long',
+        path: ['phoneNumber'],
+      })
+    }
+    if (value.phoneNumber && value.phoneNumber.length > 20) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Phone number must be at most 20 characters long',
+        path: ['phoneNumber'],
+      })
+    }
+  })
 
 export const ChangePasswordBodySchema = UserSchema.pick({
   password: true,

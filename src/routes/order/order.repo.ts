@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { eachDayOfInterval, format, subDays } from 'date-fns'
-import { CouponNotFoundException } from 'src/routes/coupon/coupon.error'
-import { HotelNotFoundException } from 'src/routes/hotel/hotel.error'
+import { CouponNotFoundException, CouponUpdatedException } from 'src/routes/coupon/coupon.error'
+import { HotelNotFoundException, HotelUpdatedException } from 'src/routes/hotel/hotel.error'
 import { ConflictRoomAvailabilityException } from 'src/routes/order/order.error'
 import {
   CreateOrderBodyType,
@@ -9,10 +9,11 @@ import {
   GetOrdersByUserIdQueryType,
   GetOrdersQueryType,
 } from 'src/routes/order/order.model'
-import { PromotionNotFoundException } from 'src/routes/promotion/promotion.error'
-import { RoomNotFoundException } from 'src/routes/room/room.error'
+import { PromotionNotFoundException, PromotionUpdatedException } from 'src/routes/promotion/promotion.error'
+import { RoomTypeUpdatedException } from 'src/routes/room-type/room-type.error'
+import { RoomNotFoundException, RoomUpdatedException } from 'src/routes/room/room.error'
 import { HotelStatus } from 'src/shared/constants/hotel.constant'
-import { ORDER_STATUS, OrderStatusType } from 'src/shared/constants/order.constant'
+import { ORDER_STATUS, OrderStatusType, REPUTATION_SCORE } from 'src/shared/constants/order.constant'
 import { POINT_VALUE } from 'src/shared/constants/other.constant'
 import { PAYMENT_TYPE, PaymentType } from 'src/shared/constants/payment.constant'
 import { toStartOfUTCDate } from 'src/shared/helpers'
@@ -178,37 +179,53 @@ export class OrderRepo {
       partnerProfit,
       promotionAmount,
       arrivalTime,
+      version,
     } = data
     const checkinDate = toStartOfUTCDate(data.checkinDate)
     const checkoutDate = toStartOfUTCDate(data.checkoutDate)
+
     // Lấy danh sách tất cả các ngày trong khoảng thời gian
     const dateRange = eachDayOfInterval({ start: checkinDate, end: subDays(checkoutDate, 1) })
 
-    //1 . Kiểm tra hotel tồn tại
+    //1 . Kiểm tra hotel tồn tại và version
     const hotel = await this.prismaService.hotel.findUnique({
       where: { id: hotelId, status: HotelStatus.ACTIVE },
       select: {
         partner: true,
+        updatedAt: true,
       },
     })
+
     if (!hotel) {
       throw HotelNotFoundException
     }
-    //2 . Kiểm tra còn phòng đủ không
+
+    if (new Date(hotel.updatedAt || '').getTime() !== new Date(version.hotel).getTime()) {
+      throw HotelUpdatedException
+    }
+
+    //2 . Kiểm tra phòng tồn tại và version
     const room = await this.prismaService.room.findUnique({
-      where: { id: roomId },
+      where: { id: roomId, hotelId: hotelId, deletedAt: null },
+      include: {
+        roomType: true,
+      },
     })
 
     if (!room) {
       throw RoomNotFoundException
     }
-
+    if (new Date(room.updatedAt || '').getTime() !== new Date(version.room).getTime()) {
+      throw RoomUpdatedException
+    }
+    if (new Date(room.roomType.updatedAt || '').getTime() !== new Date(version.roomType).getTime()) {
+      throw RoomTypeUpdatedException
+    }
     if (room.rangeLimitDate && room.rangeLimitDate < dateRange.length) {
-      throw new BadRequestException('Bạn đã đặt quá số ngày mà loại phòng này cho phép')
+      throw new BadRequestException('Cannot book more than ' + room.rangeLimitDate + ' nights')
     }
 
     //3. Kiểm tra còn phòng đủ không
-
     const roomAvailabilities = await this.prismaService.roomAvailability.findMany({
       where: {
         roomId,
@@ -236,12 +253,11 @@ export class OrderRepo {
       const dateStr = format(date, 'yyyy-MM-dd')
       const availableRooms = availabilityMap.has(dateStr) ? availabilityMap.get(dateStr)!.availableRooms : room.quantity
       if (availableRooms < quantity) {
-        throw new BadRequestException(`Không đủ phòng trống cho ngày ${dateStr}`)
+        throw new BadRequestException(`Not enough rooms available on ${dateStr}`)
       }
     }
 
-    //4. Kiểm tra coupon
-
+    //4. Kiểm tra coupon và version
     if (couponId) {
       const coupon = await this.prismaService.coupon.findUnique({
         where: { id: couponId, deletedAt: null, available: { gt: 0 } },
@@ -249,9 +265,12 @@ export class OrderRepo {
       if (!coupon) {
         throw CouponNotFoundException
       }
+      if (new Date(coupon.updatedAt || '').getTime() !== new Date(version.coupon || '').getTime()) {
+        throw CouponUpdatedException
+      }
     }
 
-    //5. Kiểm tra promotion
+    //5. Kiểm tra promotion và version
     if (promotionId) {
       const promotion = await this.prismaService.promotion.findUnique({
         where: {
@@ -265,6 +284,9 @@ export class OrderRepo {
       })
       if (!promotion) {
         throw PromotionNotFoundException
+      }
+      if (new Date(promotion.updatedAt || '').getTime() !== new Date(version.promotion || '').getTime()) {
+        throw PromotionUpdatedException
       }
     }
 
@@ -331,6 +353,7 @@ export class OrderRepo {
         await tx.coupon.update({
           where: {
             id: couponId,
+            deletedAt: null,
           },
           data: {
             available: {
@@ -362,7 +385,7 @@ export class OrderRepo {
           }
         } else {
           // Tạo bản ghi mới
-          await tx.roomAvailability.create({
+          const roomAvailability = await tx.roomAvailability.create({
             data: {
               roomId,
               createdAt: toStartOfUTCDate(date),
@@ -371,6 +394,9 @@ export class OrderRepo {
               totalRooms: room.quantity,
             },
           })
+          if (!roomAvailability) {
+            throw ConflictRoomAvailabilityException
+          }
         }
       }
       if (paymentType === PAYMENT_TYPE.PAY_AT_HOTEL) {
@@ -404,6 +430,7 @@ export class OrderRepo {
         data: {
           status: ORDER_STATUS.CHECKOUT,
           checkoutTime: new Date(),
+          updatedAt: new Date(),
         },
       })
       await this.prismaService.hotel.update({
@@ -412,7 +439,7 @@ export class OrderRepo {
         },
         data: {
           reputationScore: {
-            increment: 2,
+            increment: REPUTATION_SCORE.CHECKOUT_SUCCESS,
           },
           updatedAt: new Date(),
         },
@@ -502,7 +529,7 @@ export class OrderRepo {
         },
         data: {
           reputationScore: {
-            decrement: 5,
+            decrement: REPUTATION_SCORE.CANCEL_ORDER,
           },
         },
       })
@@ -656,7 +683,7 @@ export class OrderRepo {
         },
         data: {
           reputationScore: {
-            decrement: 5,
+            decrement: REPUTATION_SCORE.CANCEL_ORDER,
           },
         },
       })

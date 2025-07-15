@@ -78,7 +78,7 @@ export class PromotionService {
       const currentPromotion = await this.promotionRepo.findIncludeOrder(id)
 
       if (!currentPromotion) {
-        throw PromotionNotFoundException
+        throw PromotionUsedException
       }
       // Check if promotion has been used
       if (currentPromotion.order.length > 0) {
