@@ -162,6 +162,7 @@ export class AuthService {
       })
       return tokens
     } catch (error) {
+      console.log(error)
       if (isUniqueConstraintPrismaError(error)) {
         throw EmailAlreadyExistsException
       }
