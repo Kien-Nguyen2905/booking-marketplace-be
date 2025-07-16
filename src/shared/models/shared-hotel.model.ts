@@ -20,6 +20,8 @@ export const HotelSchema = z.object({
   reputationScore: z.number().int().default(100),
   rating: z.number().default(0),
   vat: z.number().min(0).max(100).int(),
+  lat: z.number().nullable(),
+  lon: z.number().nullable(),
   address: z.string().nonempty(),
   provinceCode: z.number().int(),
   districtCode: z.number().int(),

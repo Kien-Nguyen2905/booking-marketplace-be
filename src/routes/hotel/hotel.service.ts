@@ -137,6 +137,8 @@ export class HotelService {
     available: number
     page: number
     limit: number
+    lat?: number
+    lon?: number
   }) {
     return await this.hotelRepo.findHotels(query)
   }

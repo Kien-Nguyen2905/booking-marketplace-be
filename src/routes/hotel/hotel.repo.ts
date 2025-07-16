@@ -9,7 +9,7 @@ import {
 } from 'src/routes/hotel/hotel.model'
 import { HotelStatus, HotelStatusType, HotelTypeType } from 'src/shared/constants/hotel.constant'
 import { ORDER_STATUS } from 'src/shared/constants/order.constant'
-import { toStartOfUTCDate } from 'src/shared/helpers'
+import { haversineDistance, toStartOfUTCDate } from 'src/shared/helpers'
 import { PrismaService } from 'src/shared/services/prisma.service'
 import { S3Service } from 'src/shared/services/s3.service'
 
@@ -327,6 +327,8 @@ export class HotelRepo {
     type?: string
     orderBy?: string
     order?: 'asc' | 'desc'
+    lat?: number
+    lon?: number
   }) {
     const {
       province,
@@ -341,6 +343,8 @@ export class HotelRepo {
       type,
       orderBy = 'reputationScore',
       order = 'desc',
+      lat,
+      lon,
     } = query
     const skip = (page - 1) * limit
     const take = limit
@@ -490,6 +494,16 @@ export class HotelRepo {
       .map((hotel) => filterHotels(hotel, dateRange, available))
       // Loại bỏ các hotel trả về null
       .filter((hotel) => hotel !== null)
+
+    // Nếu có lat và lon thì sắp xếp theo khoảng cách
+    if (lat && lon) {
+      filteredHotels = filteredHotels
+        .map((hotel) => ({
+          ...hotel,
+          distance: haversineDistance(lat, lon, hotel.lat, hotel.lon),
+        }))
+        .sort((a, b) => a.distance - b.distance)
+    }
 
     //  orderBy là 'price' follow the price of the first room
     if (orderBy === 'price') {

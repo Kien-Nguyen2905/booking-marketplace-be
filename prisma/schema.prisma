@@ -69,6 +69,8 @@ model Hotel {
   reputationScore  Float?         @default(100) @db.Real
   rating           Float?         @default(0) @db.Real
   vat              Float          @db.Real
+  lat              Decimal?       @db.Decimal(23, 20)
+  lon              Decimal?       @db.Decimal(23, 20)
   address          String
   provinceCode     Int
   districtCode     Int

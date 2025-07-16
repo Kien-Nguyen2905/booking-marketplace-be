@@ -62,9 +62,8 @@ export class AuthRepository {
 
   // Create user
   async createUser(user: Pick<UserType, 'email' | 'fullName' | 'password' | 'roleId'>) {
-    const { id, ...userData } = user as any
     return await this.prismaService.user.create({
-      data: userData,
+      data: user,
       omit: {
         password: true,
         totpSecret: true,
@@ -137,9 +136,8 @@ export class AuthRepository {
   }
 
   async createUserIncludeRole(user: Pick<UserType, 'email' | 'fullName' | 'password' | 'avatar' | 'roleId'>) {
-    const { id, ...userData } = user as any
     return await this.prismaService.user.create({
-      data: userData,
+      data: user,
       include: {
         role: true,
       },

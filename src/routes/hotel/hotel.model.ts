@@ -49,6 +49,8 @@ export const GetFindHotelsQuerySchema = z
     type: z.string().optional(),
     rating: z.coerce.number().int().optional(),
     amenity: z.string().optional(),
+    lat: z.coerce.number().optional(),
+    lon: z.coerce.number().optional(),
   })
   .strict()
 export const GetFindHotelsResSchema = z.object({
